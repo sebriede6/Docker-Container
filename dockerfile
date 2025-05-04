@@ -18,8 +18,6 @@ RUN npm run build
 
 FROM nginx:alpine
 
-# Install wget
-RUN apk add --no-cache wget
 
 RUN rm -rf /usr/share/nginx/html/*
 
