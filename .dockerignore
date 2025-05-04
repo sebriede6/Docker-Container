@@ -1,0 +1,16 @@
+node_modules
+dist 
+build
+Dockerfile
+.dockerignore
+.git
+npm debug.log
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
