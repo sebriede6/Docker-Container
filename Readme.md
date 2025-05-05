@@ -13,37 +13,7 @@ Beide Teile der Anwendung sind containerisiert und laufen in separaten Docker-Co
 Das Repository ist wie folgt strukturiert (wichtige Dateien):
 
 ```
-/
-├── backend/
-│   ├── Dockerfile        # Backend Docker build instructions
-│   ├── server.js         # Express API code
-│   ├── package.json      # Backend Node.js dependencies
-│   └── package-lock.json # Locked backend dependencies
-│   └── .dockerignore     # Files to ignore for backend Docker build (optional, falls spezifisch)
-├── frontend/
-│   ├── Dockerfile        # Frontend Docker build instructions (React -> Nginx)
-│   ├── nginx.conf        # Nginx configuration for serving the SPA
-│   ├── package.json      # Frontend Node.js dependencies (React, Vite, etc.)
-│   ├── package-lock.json # Locked frontend dependencies
-│   ├── vite.config.js    # Vite configuration
-│   ├── index.html        # Vite HTML entry point
-│   ├── public/           # Static assets (e.g., favicons, logos like vite.svg)
-│   ├── src/              # React application source code
-│   │   ├── components/   # Reusable React components
-│   │   │   ├── NoteForm.jsx
-│   │   │   └── NoteList.jsx
-│   │   ├── apiClient.js  # Helper for API communication
-│   │   ├── App.jsx       # Main application component
-│   │   ├── main.jsx      # React application entry point
-│   │   ├── App.css
-│   │   └── index.css
-│   ├── .dockerignore     # Files to ignore for frontend Docker build
-│   ├── .gitignore        # Files to ignore for Git within frontend
-│   ├── .env              # Beispiel für lokale Entwicklungsvariablen (NICHT in Git!)
-│   └── eslint.config.js  # ESLint configuration
-├── .dockerignore         # Global files to ignore for Docker builds (Root level)
-├── .gitignore            # Global files to ignore for Git (Root level)
-└── README.md             # Diese Datei
+![alt text](image.png)
 ```
 *(Hinweis: `node_modules` und `dist` Ordner sind nicht im Diagramm aufgeführt, da sie generiert werden und durch `.gitignore` ignoriert werden sollten.)*
 
