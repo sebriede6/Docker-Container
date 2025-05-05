@@ -29,7 +29,7 @@ Die folgenden Schritte bauen die Docker-Images für Frontend und Backend und sta
 
 **1. Images bauen**
 
-Führe diese Befehle im Wurzelverzeichnis des Projekts aus:
+Man führt diese Befehle im Wurzelverzeichnis des Projekts aus:
 
 *   **Backend Image bauen:**
     ```bash
@@ -39,9 +39,9 @@ Führe diese Befehle im Wurzelverzeichnis des Projekts aus:
     ```
 
 *   **Frontend Image bauen:**
-    *   Wir müssen die URL der Backend-API als Build-Argument übergeben. Diese URL muss vom Browser des Benutzers erreichbar sein (daher `localhost` und der gemappte Port `8081`).
+    *   Man muss die URL der Backend-API als Build-Argument übergeben. Diese URL muss vom Browser des Benutzers erreichbar sein (daher `localhost` und der gemappte Port `8081`).
     ```bash
-    # Stelle sicher, dass du im Projekt-Root bist
+    # Sicherstellen, dass man im Projekt-Root ist
     docker build --build-arg VITE_API_URL=http://localhost:8081/api -t my-frontend-app:0.1.0 -f frontend/Dockerfile .
     # Alternativ: cd frontend && docker build --build-arg VITE_API_URL=http://localhost:8081/api -t my-frontend-app:0.1.0 . && cd ..
     ```
@@ -71,7 +71,7 @@ Stelle sicher, dass die Ports `8080` und `8081` auf deinem Host-System frei sind
 
 Nachdem beide Container gestartet wurden:
 
-*   **Frontend Anwendung:** Öffne deinen Webbrowser und navigiere zu:
+*   **Frontend Anwendung:** Öffne den Webbrowser und navigiere zu:
     `http://localhost:8080`
 
 *   **Backend API (zum Testen):** Du kannst die API-Endpunkte direkt über den gemappten Host-Port erreichen:
