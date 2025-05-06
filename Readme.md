@@ -1,94 +1,124 @@
 ```markdown
-# Full-Stack Notizblock (React + Node.js + Docker)
+# Full-Stack Notizblock Anwendung mit Docker
 
-Dies ist eine einfache Full-Stack Notizblock-Anwendung. Sie besteht aus:
+Dies ist eine Full-Stack-Webanwendung, bestehend aus einem React-Frontend und einer Node.js/Express-API als Backend. Beide Komponenten sind separat containerisiert und können unabhängig voneinander gebaut und gestartet werden. Die Kommunikation zwischen Frontend und Backend erfolgt über HTTP-Requests.
 
-*   Einem **React Frontend** (erstellt mit Vite), das Notizen anzeigt, hinzufügt, bearbeitet und löscht.
-*   Einem **Node.js/Express Backend** (API), das die Notizdaten verwaltet (in diesem Beispiel im Arbeitsspeicher).
-
-Beide Teile der Anwendung sind containerisiert und laufen in separaten Docker-Containern.
+Das Backend speichert die Notizdaten persistent in einer Datei (`notes.json`) innerhalb eines Docker Volumes, um sicherzustellen, dass die Daten auch nach Neustarts oder Neuerstellungen des Backend-Containers erhalten bleiben.
 
 ## Projektstruktur
 
-Das Repository ist wie folgt strukturiert (wichtige Dateien):
+Das Projekt ist wie folgt strukturiert:
 
-```
-![alt text](image.png)
-```
-*(Hinweis: `node_modules` und `dist` Ordner sind nicht im Diagramm aufgeführt, da sie generiert werden und durch `.gitignore` ignoriert werden sollten.)*
+-   `frontend/`: Enthält den gesamten Quellcode und das Dockerfile für die React-Frontend-Anwendung.
+-   `backend/`: Enthält den gesamten Quellcode und das Dockerfile für die Node.js/Express-Backend-API.
+-   `.gitignore`: Globale Git-Ignore-Datei für das gesamte Projekt.
+-   `.dockerignore`: Globale Docker-Ignore-Datei für das gesamte Projekt.
+-   `README.md`: Diese Datei.
 
-## Voraussetzungen
+## Anwendung bauen und starten
 
-*   [Docker](https://www.docker.com/get-started) muss installiert sein und laufen.
-*   [Node.js und npm](https://nodejs.org/) (werden für die Docker-Builds benötigt, aber nicht zwingend zum reinen Ausführen der Container).
-*   [Git](https://git-scm.com/) (um das Repository zu klonen).
+Sicherstellen, dass Docker auf deinem System installiert ist und läuft.
 
-## Anwendung bauen und starten (Docker)
+### 1. Backend bauen und starten (mit Datenpersistenz)
 
-Die folgenden Schritte bauen die Docker-Images für Frontend und Backend und starten sie als separate Container.
+Das Backend speichert seine Daten in einem benannten Docker Volume.
 
-**1. Images bauen**
+**Image bauen:**
 
-Man führt diese Befehle im Wurzelverzeichnis des Projekts aus:
-
-*   **Backend Image bauen:**
-    ```bash
-    # Stelle sicher, dass du im Projekt-Root bist
-    docker build -t my-backend-api:0.1.0 -f backend/Dockerfile .
-    # Alternativ: cd backend && docker build -t my-backend-api:0.1.0 . && cd ..
-    ```
-
-*   **Frontend Image bauen:**
-    *   Man muss die URL der Backend-API als Build-Argument übergeben. Diese URL muss vom Browser des Benutzers erreichbar sein (daher `localhost` und der gemappte Port `8081`).
-    ```bash
-    # Sicherstellen, dass man im Projekt-Root ist
-    docker build --build-arg VITE_API_URL=http://localhost:8081/api -t my-frontend-app:0.1.0 -f frontend/Dockerfile .
-    # Alternativ: cd frontend && docker build --build-arg VITE_API_URL=http://localhost:8081/api -t my-frontend-app:0.1.0 . && cd ..
-    ```
-    *(Hinweis: Die `-f <pfad>/Dockerfile .` Syntax erlaubt das Bauen aus dem Root-Verzeichnis unter Angabe des Dockerfile-Pfads, was manchmal praktisch ist. Die `cd`-Alternative funktioniert genauso.)*
-
-**2. Container starten**
-
-Stelle sicher, dass die Ports `8080` und `8081` auf deinem Host-System frei sind.
-
-*   **Backend Container starten:**
-    *   Dieser Befehl startet die API und leitet Port 8081 deines Hosts auf Port 3000 im Container um (wo die Node.js-App läuft).
-    ```bash
-    docker run -d -p 8081:3000 --name my-backend my-backend-api:0.1.0
-    ```
-
-*   **Frontend Container starten:**
-    *   Dieser Befehl startet den Nginx-Server mit der React-App und leitet Port 8080 deines Hosts auf Port 80 im Container um.
-    ```bash
-    # Stoppe/Entferne ggf. alte Frontend-Container mit diesem Namen
-    docker stop my-frontend && docker rm my-frontend || true
-
-    docker run -d -p 8080:80 --name my-frontend my-frontend-app:0.1.0
-    ```
-    *(`|| true` verhindert einen Fehler, falls der Container nicht existiert)*
-
-## Zugriff auf die Anwendung
-
-Nachdem beide Container gestartet wurden:
-
-*   **Frontend Anwendung:** Öffne den Webbrowser und navigiere zu:
-    `http://localhost:8080`
-
-*   **Backend API (zum Testen):** Du kannst die API-Endpunkte direkt über den gemappten Host-Port erreichen:
-    `http://localhost:8081/api`
-    *   Beispiel (alle Notizen abrufen): `http://localhost:8081/api/notes` (kann im Browser oder mit Tools wie `curl` oder Postman getestet werden).
-
-## Beenden
-
-Um die Container zu stoppen:
+Navigiere in das `backend`-Verzeichnis und baue das Image. Ersetze `persistence-0.1.0` ggf. durch deine gewünschte Version.
 
 ```bash
-docker stop my-frontend my-backend
+cd backend
+docker build -t my-backend-api:persistence-0.1.0 .
+cd ..
 ```
 
-Um die Container zu entfernen (optional, löscht die Container-Instanzen, nicht die Images):
+**Container starten:**
+
+Der folgende Befehl startet den Backend-Container, mappt Port `8081` deines Hosts auf Port `3000` im Container und verwendet ein benanntes Volume namens `my-backend-data` für die Persistenz der Anwendungsdaten im Containerpfad `/app/data`.
 
 ```bash
-docker rm my-frontend my-backend
+docker run -d \
+  -p 8081:3000 \
+  --name my-backend-persistent \
+  -v my-backend-data:/app/data \
+  my-backend-api:persistence-0.1.0
 ```
+
+
+
+### 2. Frontend bauen und starten
+
+**Image bauen:**
+
+Navigiere in das `frontend`-Verzeichnis und baue das Image. Das Build-Argument `VITE_API_URL` muss auf die Adresse und den Port zeigen, unter dem das Backend vom Browser aus erreichbar ist. Ersetze `0.1.0` ggf. durch deine gewünschte Version.
+
+```bash
+cd frontend
+docker build --build-arg VITE_API_URL=http://localhost:8081/api -t my-frontend-app:0.1.0 .
+cd ..
 ```
+
+**Container starten:**
+
+Der folgende Befehl startet den Frontend-Container und mappt Port `8080` deines Hosts auf Port `80` im Container.
+
+```bash
+# Stoppe und entferne ggf. einen vorherigen Frontend-Container
+docker stop my-frontend
+docker rm my-frontend
+
+# Starte den neuen Frontend-Container
+docker run -d -p 8080:80 --name my-frontend my-frontend-app:0.1.0
+```
+
+### 3. Anwendung im Browser aufrufen
+
+Öffne deinen Webbrowser und navigiere zu:
+
+`http://localhost:8080`
+
+Du solltest nun die Notizblock-Anwendung sehen, die mit dem Backend auf `http://localhost:8081/api` kommuniziert. Daten, die du hinzufügst, werden persistent gespeichert.
+
+## Datenpersistenz im Backend: Wahl des Volume-Typs
+
+Für die Persistenz der Backend-Daten (der `notes.json`-Datei) habe ich **Benanntes Docker Volume** (Named Volume) gewählt.
+
+**Entscheidung und Begründung:**
+
+ich habe mich für ein benanntes Volume (`my-backend-data`) anstelle eines Bind Mounts entschieden, aus folgenden Gründen:
+
+1.  **Datenisolierung und Management durch Docker:**
+    *   Benannte Volumes werden vollständig von Docker verwaltet. Der genaue Speicherort auf dem Host-Dateisystem ist für die Anwendung irrelevant und wird von Docker gehandhabt. Dies ist die sauberste Methode für reine Anwendungsdaten, da es das Host-System und das Projektverzeichnis frei von Laufzeitdaten hält.
+2.  **Portabilität:**
+    *   Benannte Volumes sind nicht an eine spezifische Verzeichnisstruktur auf dem Host gebunden. Dies macht die Anwendung und ihre Daten leichter zwischen verschiedenen Entwicklungsumgebungen oder Servern übertragbar, da man sich nicht um die Existenz oder die korrekten Pfade auf dem Host kümmern muss.
+3.  **Docker-Best-Practice für Anwendungsdaten:**
+    *   Für Daten, die von der Anwendung im Container generiert und modifiziert werden und deren Lebenszyklus unabhängig vom Container sein soll (wie unsere Notizen-Datenbank), sind benannte Volumes oft die empfohlene Lösung von Docker.
+4.  **Performance:**
+    *   Auf einigen Betriebssystemen (insbesondere macOS und Windows, die Docker in einer VM ausführen) können benannte Volumes performanter sein als Bind Mounts, da Docker den Speicherzugriff optimieren kann.
+5.  **Einfache Docker-CLI-Verwaltung:**
+    *   Benannte Volumes lassen sich einfach über Docker-Befehle erstellen (`docker volume create ...`), auflisten (`docker volume ls`), inspizieren (`docker volume inspect ...`) und entfernen (`docker volume rm ...`).
+
+**Vergleich zu Bind Mounts für diesen Anwendungsfall:**
+
+*   **Bind Mounts** würden den Inhalt eines Verzeichnisses auf dem Host-Rechner direkt in den Container spiegeln.
+    *   **Vorteil:** Einfacher direkter Zugriff auf die `notes.json` vom Host-Dateisystem aus, was während der Entwicklung zum Debuggen nützlich sein *könnte*.
+    *   **Nachteile:**
+        *   **Stärkere Kopplung an den Host:** Die Anwendung wäre vom Vorhandensein und der Struktur des Host-Verzeichnisses abhängig.
+        *   **Weniger Portabilität:** Das Verschieben der Anwendung auf ein anderes System erfordert, dass der Host-Pfad dort ebenfalls existiert oder angepasst wird.
+        *   **Potenzielle Berechtigungsprobleme:** Es kann zu Konflikten mit Benutzer-IDs (UID/GID) zwischen dem Host und dem Container kommen.
+        *   **Weniger "sauber":** Anwendungsdaten würden sich mit dem Projektcode oder anderen Host-Dateien vermischen, wenn man keinen dedizierten externen Ordner verwendet.
+
+Für die Entwicklung des *Quellcodes* selbst sind Bind Mounts oft sehr nützlich (z.B. für Hot-Reloading). Für die *persistenten Daten* der laufenden Anwendung, wie in diesem Fall, bieten benannte Volumes jedoch eine robustere und besser verwaltbare Lösung im Docker-System.
+```
+
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](<Screenshot 2025-05-06 165202.png>)
+ ![alt text](<Screenshot 2025-05-06 165245.png>) 
+ ![alt text](<Screenshot 2025-05-06 165328.png>) 
+ ![alt text](<Screenshot 2025-05-06 165524.png>) 
+ ![alt text](<Screenshot 2025-05-06 164829.png>)
