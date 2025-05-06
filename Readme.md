@@ -113,35 +113,4 @@ Für die Entwicklung des *Quellcodes* selbst sind Bind Mounts oft sehr nützlich
 
 ## Screenshots
 
-### Screenshot 1
-![Screenshot 1](Screenshot%202025-05-06%20164829.png)
-
-### Screenshot 2
-![Screenshot 2](Screenshot%202025-05-06%20165202.png)
-
-### Screenshot 3
-![Screenshot 3](Screenshot%202025-05-06%20165245.png)
-
-### Screenshot 4
-![Screenshot 4](Screenshot%202025-05-06%20165328.png)
-
-### Screenshot 5
-![Screenshot 5](Screenshot%202025-05-06%20165524.png)
-
-## Weitere Bilder
-
-### Bild 1
-![Bild 1](image.png)
-
-### Bild 2
-![Bild 2](image-2.png)
-
-### Bild 3
-![Bild 3](image-3.png)
-
-### Bild 4
-![Bild 4](image-4.png)
-
-### Bild 5
-![Bild 5](image-5.png)
-```
+![Screenshot](assets/Screenshot%202025-05-06%20163255.png)
