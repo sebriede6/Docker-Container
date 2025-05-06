@@ -1,4 +1,3 @@
-```markdown
 # Full-Stack Notizblock Anwendung mit Docker
 
 Dies ist eine Full-Stack-Webanwendung, bestehend aus einem React-Frontend und einer Node.js/Express-API als Backend. Beide Komponenten sind separat containerisiert und können unabhängig voneinander gebaut und gestartet werden. Die Kommunikation zwischen Frontend und Backend erfolgt über HTTP-Requests.
@@ -7,13 +6,41 @@ Das Backend speichert die Notizdaten persistent in einer Datei (`notes.json`) in
 
 ## Projektstruktur
 
-Das Projekt ist wie folgt strukturiert:
-
--   `frontend/`: Enthält den gesamten Quellcode und das Dockerfile für die React-Frontend-Anwendung.
--   `backend/`: Enthält den gesamten Quellcode und das Dockerfile für die Node.js/Express-Backend-API.
--   `.gitignore`: Globale Git-Ignore-Datei für das gesamte Projekt.
--   `.dockerignore`: Globale Docker-Ignore-Datei für das gesamte Projekt.
--   `README.md`: Diese Datei.
+```
+react-docker-notizblock/
+├── Readme.md
+├── assets/
+│   ├── Screenshot 2025-05-06 163255.png
+│   ├── Screenshot 2025-05-06 164123.png
+│   ├── Screenshot 2025-05-06 164307.png
+│   ├── Screenshot 2025-05-06 164829.png
+│   ├── Screenshot 2025-05-06 165202.png
+│   ├── Screenshot 2025-05-06 165245.png
+│   ├── Screenshot 2025-05-06 165328.png
+│   └── Screenshot 2025-05-06 165524.png
+├── backend/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── server.js
+│   └── data/
+├── frontend/
+│   ├── Dockerfile
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── nginx.conf
+│   ├── package.json
+│   ├── README.md
+│   ├── vite.config.js
+│   └── src/
+│       ├── apiClient.js
+│       ├── App.css
+│       ├── App.jsx
+│       ├── index.css
+│       ├── main.jsx
+│       └── components/
+│           ├── NoteForm.jsx
+│           └── NoteList.jsx
+```
 
 ## Anwendung bauen und starten
 
@@ -44,8 +71,6 @@ docker run -d \
   -v my-backend-data:/app/data \
   my-backend-api:persistence-0.1.0
 ```
-
-
 
 ### 2. Frontend bauen und starten
 
