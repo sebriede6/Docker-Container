@@ -1,4 +1,4 @@
-// backend/src/app.js
+
 
 const express = require('express');
 const cors = require('cors');
@@ -11,13 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// KORREKTUR HIER:
-// Der noteRoutes-Router, der Routen wie '/notes' definiert,
-// wird unter dem Präfix '/api' eingehängt.
-// ALT: app.use('/api/notes', noteRoutes);
-app.use('/api', noteRoutes); // NEU
-
-// Dieser Teil für 404 und Fehlerbehandlung bleibt gleich
+app.use('/api', noteRoutes); 
 app.use((req, res, next) => {
   res.status(404).json({ message: `Endpunkt ${req.method} ${req.originalUrl} nicht gefunden.` });
 });
