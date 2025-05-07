@@ -1,7 +1,3 @@
-
----
-
-```markdown
 # Full-Stack Notizblock Anwendung mit Docker, Netzwerk & Reverse Proxy
 
 Dies ist eine Full-Stack-Webanwendung, bestehend aus einem React-Frontend und einer Node.js/Express-API als Backend. Beide Komponenten sind separat containerisiert. Die Kommunikation zwischen Frontend und Backend erfolgt über ein dediziertes Docker-Netzwerk, wobei Nginx im Frontend-Container als Reverse Proxy für API-Aufrufe dient.
@@ -61,6 +57,11 @@ react-docker-notizblock/
 └── .gitignore                # Globales .gitignore im Wurzelverzeichnis
 ```
 
+## Screenshots
+
+Ein Vorschau-Screenshot ist unten eingebettet. Klicken Sie auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
+
+[![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
 
 ## Persistenz im Backend
 
@@ -137,7 +138,6 @@ docker run -d \
 
 Du solltest nun die Notizblock-Anwendung sehen. API-Aufrufe gehen an `http://localhost:8080/api/...` und werden von Nginx an das Backend weitergeleitet.
 
-
 1.  **Weg einer API-Anfrage:**
     Browser (auf `localhost:8080`) -> sendet Anfrage an `http://localhost:8080/api/notes` -> Host leitet Anfrage an Port 8080 weiter -> Frontend-Container (`frontend-app`) auf Port 80 (Nginx) -> Nginx's `location /api/`-Block fängt die Anfrage ab -> Nginx leitet die Anfrage per `proxy_pass` an `http://backend-service:3000/api/notes` (oder den entsprechenden internen Pfad, je nach `proxy_pass` Konfiguration) über das Docker-Netzwerk `mein-app-netzwerk` -> Backend-Container (`backend-service`) empfängt Anfrage auf Port 3000 -> Backend verarbeitet Anfrage und sendet Antwort zurück.
 
@@ -157,8 +157,3 @@ Du solltest nun die Notizblock-Anwendung sehen. API-Aufrufe gehen an `http://loc
     *   **Zentraler Eingangspunkt:** Nginx kann als zentraler Punkt für SSL-Terminierung, Load Balancing (bei mehreren Backend-Instanzen), Caching, Request-Filterung oder -Modifikation dienen.
     *   **Sicherheit:** Das Backend muss nicht direkt über einen Host-Port nach außen exponiert werden; nur der Frontend-Proxy ist direkt erreichbar.
     *   **Entkopplung:** Die interne Netzwerkstruktur und die Ports der Backend-Dienste können geändert werden, ohne dass das Frontend oder der Browser davon betroffen sind, solange die Proxy-Konfiguration angepasst wird.
-```
-
----
-
-![Screenshot](assets/Screenshot%202025-05-06%20163255.png)
