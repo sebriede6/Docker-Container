@@ -8,24 +8,24 @@ Das Backend speichert die Notizdaten persistent in einer Datei (`notes.json`) in
 
 ```
 react-docker-notizblock/
-├── README.md                 # Diese Datei
-├── assets/                   # Enthält Screenshots für die Dokumentation
-│   ├── Screenshot_App_API_Call.png  # (Beispielname, bitte anpassen)
-│   ├── Screenshot_Docker_Netzwerk.png # (Beispielname, bitte anpassen)
-│   ├── Screenshot_Persistenz_Vorher.png # (Beispielname, bitte anpassen)
-│   └── Screenshot_Persistenz_Nachher.png# (Beispielname, bitte anpassen)
+├── README.md                 
+├── assets/                   
+│   ├── Screenshot_App_API_Call.png  
+│   ├── Screenshot_Docker_Netzwerk.png 
+│   ├── Screenshot_Persistenz_Vorher.png 
+│   └── Screenshot_Persistenz_Nachher.png
 ├── backend/
 │   ├── .dockerignore
 │   ├── Dockerfile
 │   ├── package.json
 │   ├── package-lock.json
-│   ├── server.js             # Startpunkt des Backends
-│   ├── data/                 # (Dieses Verzeichnis ist für das Volume-Mapping gedacht,
-│   │                         #  wird aber durch das benannte Volume ersetzt/gemanagt)
+│   ├── server.js           
+│   ├── data/                
+│   │                         
 │   └── src/
 │       ├── app.js
 │       ├── config/
-│       │   └── index.js      # (Annahme: config.js heißt jetzt index.js im config-Ordner)
+│       │   └── index.js      
 │       ├── controllers/
 │       │   └── noteController.js
 │       ├── routes/
@@ -34,16 +34,16 @@ react-docker-notizblock/
 │           └── fileService.js
 ├── frontend/
 │   ├── .dockerignore
-│   ├── .env                  # (Sollte in .gitignore sein, falls es Geheimnisse enthält)
-│   ├── .env.local            # (Sollte in .gitignore sein)
-│   ├── .gitignore            # Frontend-spezifisches .gitignore
+│   ├── .env                  
+│   ├── .env.local            
+│   ├── .gitignore            
 │   ├── Dockerfile
 │   ├── eslint.config.js
 │   ├── index.html
-│   ├── nginx.conf            # Benutzerdefinierte Nginx-Konfiguration für den Reverse Proxy
+│   ├── nginx.conf           
 │   ├── package.json
 │   ├── package-lock.json
-│   ├── README.md             # (Optional: Frontend-spezifische Readme)
+│   ├── README.md             
 │   ├── vite.config.js
 │   └── src/
 │       ├── apiClient.js
@@ -54,7 +54,7 @@ react-docker-notizblock/
 │       └── components/
 │           ├── NoteForm.jsx
 │           └── NoteList.jsx
-└── .gitignore                # Globales .gitignore im Wurzelverzeichnis
+└── .gitignore                
 ```
 
 ## Screenshots
