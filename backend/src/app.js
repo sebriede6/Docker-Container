@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const noteRoutes = require('./routes/noteRoutes');
-const { initializeNotes } = require('./controllers/noteController'); // Nur initializeNotes importieren
+const { initializeNotes } = require('./controllers/noteController'); 
 const { PORT } = require('./config'); 
 
 const app = express();
@@ -26,7 +26,7 @@ app.use((err, req, res, next) => {
 
 
 
-const initializeApp = async () => { // <<< HIER WIRD initializeApp DEFINIERT
+const initializeApp = async () => { 
   try {
     await initializeNotes(); 
   } catch (error) {
