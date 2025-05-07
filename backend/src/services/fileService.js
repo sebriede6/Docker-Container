@@ -1,26 +1,19 @@
-const fs = require("node:fs");
-const { DATA_DIR, DATA_FILE } = require("../config");
+const fs = require('node:fs');
+const { DATA_DIR, DATA_FILE } = require('../config');
 
 const ensureDataDirExists = async () => {
   try {
     await fs.promises.access(DATA_DIR);
   } catch (error) {
-    if (error.code === "ENOENT") {
-      console.log(
-        `Datenverzeichnis ${DATA_DIR} nicht gefunden. Erstelle es...`,
-      );
+    if (error.code === 'ENOENT') {
       try {
         await fs.promises.mkdir(DATA_DIR, { recursive: true });
-        console.log(`Datenverzeichnis ${DATA_DIR} erfolgreich erstellt.`);
       } catch (mkdirError) {
-        console.error(
-          `Fehler beim Erstellen des Datenverzeichnisses ${DATA_DIR}:`,
-          mkdirError,
-        );
+        console.error(`Error creating data directory ${DATA_DIR}:`, mkdirError);
         throw mkdirError;
       }
     } else {
-      console.error(`Unerwarteter Fehler beim Zugriff auf ${DATA_DIR}:`, error);
+      console.error(`Unexpected error accessing ${DATA_DIR}:`, error);
       throw error;
     }
   }
@@ -30,17 +23,13 @@ const loadNotes = async () => {
   await ensureDataDirExists();
   try {
     await fs.promises.access(DATA_FILE);
-    const fileData = await fs.promises.readFile(DATA_FILE, "utf-8");
-    console.log(`Notizen erfolgreich aus ${DATA_FILE} geladen.`);
+    const fileData = await fs.promises.readFile(DATA_FILE, 'utf-8');
     return JSON.parse(fileData);
   } catch (error) {
-    if (error.code === "ENOENT") {
-      console.log(
-        `${DATA_FILE} nicht gefunden. Initialisiere mit leeren Notizen.`,
-      );
+    if (error.code === 'ENOENT') {
       return [];
     }
-    console.error(`Fehler beim Laden der Notizen aus ${DATA_FILE}:`, error);
+    console.error(`Error loading notes from ${DATA_FILE}:`, error);
     return [];
   }
 };
@@ -48,14 +37,9 @@ const loadNotes = async () => {
 const saveNotes = async (notesToSave) => {
   await ensureDataDirExists();
   try {
-    await fs.promises.writeFile(
-      DATA_FILE,
-      JSON.stringify(notesToSave, null, 2),
-      "utf-8",
-    );
-    console.log(`Notizen erfolgreich in ${DATA_FILE} gespeichert.`);
+    await fs.promises.writeFile(DATA_FILE, JSON.stringify(notesToSave, null, 2), 'utf-8');
   } catch (error) {
-    console.error(`Fehler beim Speichern der Notizen in ${DATA_FILE}:`, error);
+    console.error(`Error saving notes to ${DATA_FILE}:`, error);
     throw error;
   }
 };

@@ -1,12 +1,11 @@
-const { app, initializeApp, PORT } = require("./src/app");
-const { DATA_FILE } = require("./src/config");
+const { app, initializeApp, PORT } = require('./src/app');
+const { DATA_FILE } = require('./src/config');
 
 const start = async () => {
   try {
     await initializeApp();
-
-    app.listen(PORT, () => {
-      console.log(`Backend API läuft auf http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => { // Lausche auf 0.0.0.0, um Verbindungen von anderen Containern zu ermöglichen
+      console.log(`Backend API läuft auf Port ${PORT}`);
       console.log(`Daten werden in/aus ${DATA_FILE} gelesen/geschrieben.`);
     });
   } catch (error) {
