@@ -1,5 +1,5 @@
 const fs = require('node:fs');
-const { DATA_DIR, DATA_FILE } = require('../config'); // Importiere aus unserer Config
+const { DATA_DIR, DATA_FILE } = require('../config'); 
 
 const ensureDataDirExists = async () => {
   try {
@@ -21,7 +21,7 @@ const ensureDataDirExists = async () => {
   }
 };
 
-const loadNotes = async () => { // Umbenannt von loadNotesFromFile
+const loadNotes = async () => { 
   await ensureDataDirExists();
   try {
     await fs.promises.access(DATA_FILE);
@@ -38,7 +38,7 @@ const loadNotes = async () => { // Umbenannt von loadNotesFromFile
   }
 };
 
-const saveNotes = async (notesToSave) => { // Umbenannt von saveNotesToFile
+const saveNotes = async (notesToSave) => { 
   await ensureDataDirExists();
   try {
     await fs.promises.writeFile(DATA_FILE, JSON.stringify(notesToSave, null, 2), 'utf-8');
