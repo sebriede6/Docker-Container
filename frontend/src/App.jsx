@@ -5,7 +5,7 @@ import { getNotes, addNote, deleteNote } from "./apiClient";
 import "./App.css";
 
 function App() {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState([{ id: "test-note", text: "Dies ist eine Testnotiz." }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,7 +14,12 @@ function App() {
     setError(null);
     getNotes()
       .then((response) => {
-        setNotes(response.data || response);
+        const loadedNotes = response.data || response;
+        if (loadedNotes.length === 0) {
+          setNotes([{ id: "test-note", text: "Dies ist eine Testnotiz." }]);
+        } else {
+          setNotes(loadedNotes);
+        }
       })
       .catch((err) => {
         console.error("Fehler beim Laden der Notizen:", err);
