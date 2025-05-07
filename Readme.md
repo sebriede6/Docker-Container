@@ -72,7 +72,7 @@ Das Backend speichert Notizdaten in der Datei `/app/data/notes.json` innerhalb s
 Das Frontend (eine React Single Page Application) wird von einem Nginx-Webserver ausgeliefert, der im Frontend-Docker-Container läuft. Nginx dient hier zusätzlich als **Reverse Proxy** für API-Anfragen:
 
 *   **Zweck:**
-    *   Das Frontend, das im Browser des Benutzers unter `http://localhost:8080` läuft, sendet API-Anfragen an relative Pfade (z.B. `/api/notes`).
+    *   Das Frontend, das im Browser des Benutzers unter `http://localhost:8080` läuft, sendet API-Anfragen an relative Pfade ( `/api/notes`).
     *   Nginx fängt diese Anfragen ab und leitet sie an den Backend-Service (`http://backend-service:3000/api/notes`) im internen Docker-Netzwerk weiter.
     *   Dies vermeidet CORS-Probleme und entkoppelt die vom Browser verwendete URL von der internen Netzwerkadresse des Backends.
 *   **Konfiguration:**
@@ -148,11 +148,11 @@ Du solltest nun die Notizblock-Anwendung sehen. API-Aufrufe gehen an `http://loc
     Die benutzerdefinierte Nginx-Konfiguration (`frontend/nginx.conf`) implementiert das Reverse-Proxy-Muster. Der relevante `location /api/`-Block fängt alle Anfragen ab, die mit `/api/` beginnen. Anstatt zu versuchen, diese als statische Dateien auszuliefern, leitet er (`proxy_pass`) sie an den angegebenen Backend-Service (`http://backend-service:3000`) weiter. Er fungiert als Vermittler, der Anfragen vom extern erreichbaren Frontend an das intern laufende Backend weitergibt.
 
 4.  **Änderung von `VITE_API_URL`:**
-    *   **Vorherige Aufgabe (direkte Kommunikation über Host-Ports):** `VITE_API_URL` war z.B. `http://localhost:8081/api`. Der Browser musste das Backend direkt über einen gemappten Host-Port erreichen.
-    *   **Aktuelle Aufgabe (Reverse Proxy):** `VITE_API_URL` wurde zu `/api` geändert. Der JavaScript-Code im Browser (`apiClient.js`) wurde angepasst, um diesen relativen Pfad zu verwenden. Die Anfragen gehen an denselben Host und Port wie das Frontend selbst (z.B. `http://localhost:8080/api/...`). Nginx im Frontend-Container fängt diesen Pfad ab und leitet ihn intern an das Backend weiter. Der eigentliche Hostname und Port des Backends ist für den Browser nicht mehr direkt relevant.
+    *   **Vorherige Aufgabe (direkte Kommunikation über Host-Ports):** `VITE_API_URL` war  `http://localhost:8081/api`. Der Browser musste das Backend direkt über einen gemappten Host-Port erreichen.
+    *   **Aktuelle Aufgabe (Reverse Proxy):** `VITE_API_URL` wurde zu `/api` geändert. Der JavaScript-Code im Browser (`apiClient.js`) wurde angepasst, um diesen relativen Pfad zu verwenden. Die Anfragen gehen an denselben Host und Port wie das Frontend selbst ( `http://localhost:8080/api/...`). Nginx im Frontend-Container fängt diesen Pfad ab und leitet ihn intern an das Backend weiter. Der eigentliche Hostname und Port des Backends ist für den Browser nicht mehr direkt relevant.
 
 5.  **Vorteile des Reverse Proxy Musters:**
-    *   **CORS-Vermeidung:** Da alle Anfragen vom Browser an denselben Ursprung (Host und Port, z.B. `localhost:8080`) gehen, treten keine Cross-Origin Resource Sharing (CORS) Probleme auf, die sonst auftreten würden, wenn der Browser von `localhost:8080` direkt auf `localhost:8081` zugreifen würde.
+    *   **CORS-Vermeidung:** Da alle Anfragen vom Browser an denselben Ursprung (Host und Port,  `localhost:8080`) gehen, treten keine Cross-Origin Resource Sharing (CORS) Probleme auf, die sonst auftreten würden, wenn der Browser von `localhost:8080` direkt auf `localhost:8081` zugreifen würde.
     *   **Vereinfachte URL-Struktur:** Der Benutzer und das Frontend sehen eine einheitliche URL-Basis.
     *   **Zentraler Eingangspunkt:** Nginx kann als zentraler Punkt für SSL-Terminierung, Load Balancing (bei mehreren Backend-Instanzen), Caching, Request-Filterung oder -Modifikation dienen.
     *   **Sicherheit:** Das Backend muss nicht direkt über einen Host-Port nach außen exponiert werden; nur der Frontend-Proxy ist direkt erreichbar.
