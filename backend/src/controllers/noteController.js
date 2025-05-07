@@ -1,4 +1,4 @@
-const fileService = require('../services/fileService'); // Importiere unseren fileService
+const fileService = require('../services/fileService'); // 
 
 let notes = []; 
 let nextId = 1; 
