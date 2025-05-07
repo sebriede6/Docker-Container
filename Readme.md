@@ -114,27 +114,27 @@ Für die Persistenz der Backend-Daten (der `notes.json`-Datei) habe ich **Benann
 ich habe mich für ein benanntes Volume (`my-backend-data`) anstelle eines Bind Mounts entschieden, aus folgenden Gründen:
 
 1.  **Datenisolierung und Management durch Docker:**
-    *   Benannte Volumes werden vollständig von Docker verwaltet. Der genaue Speicherort auf dem Host-Dateisystem ist für die Anwendung irrelevant und wird von Docker gehandhabt. Dies ist die sauberste Methode für reine Anwendungsdaten, da es das Host-System und das Projektverzeichnis frei von Laufzeitdaten hält.
+    - Benannte Volumes werden vollständig von Docker verwaltet. Der genaue Speicherort auf dem Host-Dateisystem ist für die Anwendung irrelevant und wird von Docker gehandhabt. Dies ist die sauberste Methode für reine Anwendungsdaten, da es das Host-System und das Projektverzeichnis frei von Laufzeitdaten hält.
 2.  **Portabilität:**
-    *   Benannte Volumes sind nicht an eine spezifische Verzeichnisstruktur auf dem Host gebunden. Dies macht die Anwendung und ihre Daten leichter zwischen verschiedenen Entwicklungsumgebungen oder Servern übertragbar, da man sich nicht um die Existenz oder die korrekten Pfade auf dem Host kümmern muss.
+    - Benannte Volumes sind nicht an eine spezifische Verzeichnisstruktur auf dem Host gebunden. Dies macht die Anwendung und ihre Daten leichter zwischen verschiedenen Entwicklungsumgebungen oder Servern übertragbar, da man sich nicht um die Existenz oder die korrekten Pfade auf dem Host kümmern muss.
 3.  **Docker-Best-Practice für Anwendungsdaten:**
-    *   Für Daten, die von der Anwendung im Container generiert und modifiziert werden und deren Lebenszyklus unabhängig vom Container sein soll (wie unsere Notizen-Datenbank), sind benannte Volumes oft die empfohlene Lösung von Docker.
+    - Für Daten, die von der Anwendung im Container generiert und modifiziert werden und deren Lebenszyklus unabhängig vom Container sein soll (wie unsere Notizen-Datenbank), sind benannte Volumes oft die empfohlene Lösung von Docker.
 4.  **Performance:**
-    *   Auf einigen Betriebssystemen (insbesondere macOS und Windows, die Docker in einer VM ausführen) können benannte Volumes performanter sein als Bind Mounts, da Docker den Speicherzugriff optimieren kann.
+    - Auf einigen Betriebssystemen (insbesondere macOS und Windows, die Docker in einer VM ausführen) können benannte Volumes performanter sein als Bind Mounts, da Docker den Speicherzugriff optimieren kann.
 5.  **Einfache Docker-CLI-Verwaltung:**
-    *   Benannte Volumes lassen sich einfach über Docker-Befehle erstellen (`docker volume create ...`), auflisten (`docker volume ls`), inspizieren (`docker volume inspect ...`) und entfernen (`docker volume rm ...`).
+    - Benannte Volumes lassen sich einfach über Docker-Befehle erstellen (`docker volume create ...`), auflisten (`docker volume ls`), inspizieren (`docker volume inspect ...`) und entfernen (`docker volume rm ...`).
 
 **Vergleich zu Bind Mounts für diesen Anwendungsfall:**
 
-*   **Bind Mounts** würden den Inhalt eines Verzeichnisses auf dem Host-Rechner direkt in den Container spiegeln.
-    *   **Vorteil:** Einfacher direkter Zugriff auf die `notes.json` vom Host-Dateisystem aus, was während der Entwicklung zum Debuggen nützlich sein *könnte*.
-    *   **Nachteile:**
-        *   **Stärkere Kopplung an den Host:** Die Anwendung wäre vom Vorhandensein und der Struktur des Host-Verzeichnisses abhängig.
-        *   **Weniger Portabilität:** Das Verschieben der Anwendung auf ein anderes System erfordert, dass der Host-Pfad dort ebenfalls existiert oder angepasst wird.
-        *   **Potenzielle Berechtigungsprobleme:** Es kann zu Konflikten mit Benutzer-IDs (UID/GID) zwischen dem Host und dem Container kommen.
-        *   **Weniger "sauber":** Anwendungsdaten würden sich mit dem Projektcode oder anderen Host-Dateien vermischen, wenn man keinen dedizierten externen Ordner verwendet.
+- **Bind Mounts** würden den Inhalt eines Verzeichnisses auf dem Host-Rechner direkt in den Container spiegeln.
+  - **Vorteil:** Einfacher direkter Zugriff auf die `notes.json` vom Host-Dateisystem aus, was während der Entwicklung zum Debuggen nützlich sein _könnte_.
+  - **Nachteile:**
+    - **Stärkere Kopplung an den Host:** Die Anwendung wäre vom Vorhandensein und der Struktur des Host-Verzeichnisses abhängig.
+    - **Weniger Portabilität:** Das Verschieben der Anwendung auf ein anderes System erfordert, dass der Host-Pfad dort ebenfalls existiert oder angepasst wird.
+    - **Potenzielle Berechtigungsprobleme:** Es kann zu Konflikten mit Benutzer-IDs (UID/GID) zwischen dem Host und dem Container kommen.
+    - **Weniger "sauber":** Anwendungsdaten würden sich mit dem Projektcode oder anderen Host-Dateien vermischen, wenn man keinen dedizierten externen Ordner verwendet.
 
-Für die Entwicklung des *Quellcodes* selbst sind Bind Mounts oft sehr nützlich (z.B. für Hot-Reloading). Für die *persistenten Daten* der laufenden Anwendung, wie in diesem Fall, bieten benannte Volumes jedoch eine robustere und besser verwaltbare Lösung im Docker-System.
+Für die Entwicklung des _Quellcodes_ selbst sind Bind Mounts oft sehr nützlich (z.B. für Hot-Reloading). Für die _persistenten Daten_ der laufenden Anwendung, wie in diesem Fall, bieten benannte Volumes jedoch eine robustere und besser verwaltbare Lösung im Docker-System.
 
 ## Screenshots
 

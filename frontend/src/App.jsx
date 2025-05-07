@@ -1,40 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import NoteForm from './components/NoteForm';
-import NoteList from './components/NoteList';
-import { getNotes, addNote, deleteNote } from './apiClient'; 
-import './App.css';
+import React, { useState, useEffect } from "react";
+import NoteForm from "./components/NoteForm";
+import NoteList from "./components/NoteList";
+import { getNotes, addNote, deleteNote } from "./apiClient";
+import "./App.css";
 
 function App() {
-  const [notes, setNotes] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null); 
-
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     getNotes()
-      .then(response => {
-        
+      .then((response) => {
         setNotes(response.data || response);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Fehler beim Laden der Notizen:", err);
         setError("Fehler beim Laden der Notizen vom Backend.");
       })
       .finally(() => {
         setLoading(false);
       });
-  }, []); 
+  }, []);
 
   const handleAddNote = (noteText) => {
     setError(null);
     addNote(noteText)
-      .then(response => {
-
-        setNotes([...notes, response.data || response]); 
+      .then((response) => {
+        setNotes([...notes, response.data || response]);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Fehler beim Hinzufügen der Notiz:", err);
         setError("Fehler beim Hinzufügen der Notiz.");
       });
@@ -44,9 +41,9 @@ function App() {
     setError(null);
     deleteNote(idToDelete)
       .then(() => {
-        setNotes(notes.filter((note) => note.id !== idToDelete)); 
+        setNotes(notes.filter((note) => note.id !== idToDelete));
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Fehler beim Löschen der Notiz:", err);
         setError("Fehler beim Löschen der Notiz.");
       });
@@ -58,14 +55,14 @@ function App() {
       <NoteForm onAddNote={handleAddNote} />
 
       {loading && <p>Lade Notizen...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && notes.length > 0 ? (
-        
         <NoteList notes={notes} onDeleteNote={handleDeleteNote} />
       ) : null}
-       {!loading && !error && notes.length === 0 && <p>Keine Notizen vom Backend geladen.</p>}
-
+      {!loading && !error && notes.length === 0 && (
+        <p>Keine Notizen vom Backend geladen.</p>
+      )}
     </div>
   );
 }

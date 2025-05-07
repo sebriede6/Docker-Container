@@ -28,7 +28,7 @@ Docker baut Images in Schichten (Layers), wobei jeder Befehl im Dockerfile (wie 
 Im Multi-Stage Build wird dies clever genutzt:
 COPY package.json package-lock.json ./: Dieser Schritt wird als Erstes nach WORKDIR ausgeführt. Solange sich package.json oder package-lock.json nicht ändern, wird dieser Layer (und der darauf folgende RUN npm ci Layer) aus dem Cache genommen.
 RUN npm ci: Dieser (oft zeitaufwändige) Schritt wird nur dann ausgeführt, wenn sich die package*.json-Dateien im vorherigen Schritt geändert haben.
-COPY . .: Dieser Schritt kopiert den restlichen Quellcode. Wenn sich nur der Quellcode ändert, aber nicht die Abhängigkeiten, werden die Layer für COPY package*.json und RUN npm ci aus dem Cache verwendet, und nur COPY . . und RUN npm run build müssen neu ausgeführt werden.
+COPY . .: Dieser Schritt kopiert den restlichen Quellcode. Wenn sich nur der Quellcode ändert, aber nicht die Abhängigkeiten, werden die Layer für COPY package\*.json und RUN npm ci aus dem Cache verwendet, und nur COPY . . und RUN npm run build müssen neu ausgeführt werden.
 Diese Reihenfolge optimiert das Caching, da die selten geänderten Abhängigkeitsdefinitionen vor dem häufiger geänderten Quellcode kopiert werden.
 Rolle des Webservers und der Anwendung:
 Was wird genau im finalen Image gespeichert – der gesamte Quellcode, die Build-Abhängigkeiten oder das reine Build-Ergebnis (statische Dateien)? Erkläre den Unterschied zur ersten Stage.

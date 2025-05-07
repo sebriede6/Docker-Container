@@ -1,9 +1,9 @@
-const { app, initializeApp, PORT } = require('./src/app'); 
-const { DATA_FILE } = require('./src/config'); 
+const { app, initializeApp, PORT } = require("./src/app");
+const { DATA_FILE } = require("./src/config");
 
 const start = async () => {
   try {
-    await initializeApp(); 
+    await initializeApp();
 
     app.listen(PORT, () => {
       console.log(`Backend API läuft auf http://localhost:${PORT}`);
@@ -11,7 +11,7 @@ const start = async () => {
     });
   } catch (error) {
     console.error("Kritischer Fehler beim Starten des Servers:", error);
-    process.exit(1); 
+    process.exit(1);
   }
 };
 
