@@ -15,7 +15,7 @@ function App() {
     setError(null);
     getNotes()
       .then(response => {
-        // Axios: response.data; Fetch: direkt die Daten
+        
         setNotes(response.data || response);
       })
       .catch(err => {
@@ -44,7 +44,7 @@ function App() {
     setError(null);
     deleteNote(idToDelete)
       .then(() => {
-        setNotes(notes.filter((note) => note.id !== idToDelete)); // Filtere die gelöschte Notiz raus
+        setNotes(notes.filter((note) => note.id !== idToDelete)); 
       })
       .catch(err => {
         console.error("Fehler beim Löschen der Notiz:", err);
