@@ -1,11 +1,14 @@
+// frontend/src/App.jsx
 import React, { useState, useEffect } from "react";
 import NoteForm from "./components/NoteForm";
 import NoteList from "./components/NoteList";
 import { getNotes, addNote, deleteNote } from "./apiClient";
 import "./App.css";
 
+const ALWAYS_VISIBLE_TEST_NOTE = { id: "always-visible-test", text: "Dies ist eine immer sichtbare Testnotiz (nur Frontend)." };
+
 function App() {
-  const [notes, setNotes] = useState([{ id: "test-note", text: "Dies ist eine Testnotiz." }]);
+  const [notesFromBackend, setNotesFromBackend] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,12 +17,7 @@ function App() {
     setError(null);
     getNotes()
       .then((response) => {
-        const loadedNotes = response.data || response;
-        if (loadedNotes.length === 0) {
-          setNotes([{ id: "test-note", text: "Dies ist eine Testnotiz." }]);
-        } else {
-          setNotes(loadedNotes);
-        }
+        setNotesFromBackend(response.data || response);
       })
       .catch((err) => {
         console.error("Fehler beim Laden der Notizen:", err);
@@ -34,7 +32,7 @@ function App() {
     setError(null);
     addNote(noteText)
       .then((response) => {
-        setNotes([...notes, response.data || response]);
+        setNotesFromBackend(prevNotes => [...prevNotes, response.data || response]);
       })
       .catch((err) => {
         console.error("Fehler beim Hinzufügen der Notiz:", err);
@@ -43,16 +41,22 @@ function App() {
   };
 
   const handleDeleteNote = (idToDelete) => {
+    if (idToDelete === ALWAYS_VISIBLE_TEST_NOTE.id) {
+      console.warn("Die immer sichtbare Testnotiz kann nicht gelöscht werden.");
+      return;
+    }
     setError(null);
     deleteNote(idToDelete)
       .then(() => {
-        setNotes(notes.filter((note) => note.id !== idToDelete));
+        setNotesFromBackend(prevNotes => prevNotes.filter((note) => note.id !== idToDelete));
       })
       .catch((err) => {
         console.error("Fehler beim Löschen der Notiz:", err);
         setError("Fehler beim Löschen der Notiz.");
       });
   };
+
+  const notesToDisplay = [ALWAYS_VISIBLE_TEST_NOTE, ...notesFromBackend];
 
   return (
     <div className="App">
@@ -62,11 +66,17 @@ function App() {
       {loading && <p>Lade Notizen...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {!loading && !error && notes.length > 0 ? (
-        <NoteList notes={notes} onDeleteNote={handleDeleteNote} />
-      ) : null}
-      {!loading && !error && notes.length === 0 && (
-        <p>Keine Notizen vom Backend geladen.</p>
+      {!loading && !error && (
+        <NoteList notes={notesToDisplay} onDeleteNote={handleDeleteNote} />
+      )}
+      {!loading && !error && notesFromBackend.length === 0 && notesToDisplay.length > 0 && (
+         <p style={{marginTop: "1em", fontStyle: "italic"}}>Keine weiteren Notizen vom Backend geladen.</p>
+      )}
+       {!loading && error && notesToDisplay.length > 0 && (
+        <>
+          <NoteList notes={[ALWAYS_VISIBLE_TEST_NOTE]} onDeleteNote={handleDeleteNote} />
+          <p style={{marginTop: "1em", fontStyle: "italic"}}>Backend-Notizen konnten nicht geladen werden.</p>
+        </>
       )}
     </div>
   );
