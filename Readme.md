@@ -59,7 +59,7 @@ react-docker-notizblock/
 
 ## Screenshots
 
-Ein Vorschau-Screenshot ist unten eingebettet. Klicken Sie auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
+Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
 
 [![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
 
