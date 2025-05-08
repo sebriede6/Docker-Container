@@ -1,3 +1,5 @@
+# Das Repository enthält eine theoretische Ausarbeitung zum Datenbankshema. Man findet sie in der sql_shema_and_query.md
+
 # Full-Stack Notizblock Anwendung mit Docker, Netzwerk & Reverse Proxy
 
 Dies ist eine Full-Stack-Webanwendung, bestehend aus einem React-Frontend und einer Node.js/Express-API als Backend. Beide Komponenten sind separat containerisiert. Die Kommunikation zwischen Frontend und Backend erfolgt über ein dediziertes Docker-Netzwerk, wobei Nginx im Frontend-Container als Reverse Proxy für API-Aufrufe dient.
@@ -157,3 +159,4 @@ Du solltest nun die Notizblock-Anwendung sehen. API-Aufrufe gehen an `http://loc
     *   **Zentraler Eingangspunkt:** Nginx kann als zentraler Punkt für SSL-Terminierung, Load Balancing (bei mehreren Backend-Instanzen), Caching, Request-Filterung oder -Modifikation dienen.
     *   **Sicherheit:** Das Backend muss nicht direkt über einen Host-Port nach außen exponiert werden; nur der Frontend-Proxy ist direkt erreichbar.
     *   **Entkopplung:** Die interne Netzwerkstruktur und die Ports der Backend-Dienste können geändert werden, ohne dass das Frontend oder der Browser davon betroffen sind, solange die Proxy-Konfiguration angepasst wird.
+
