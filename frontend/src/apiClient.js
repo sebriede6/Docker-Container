@@ -13,6 +13,8 @@ const apiClient = axios.create({
   },
 });
 
+export const updateNote = (id, noteText) => apiClient.put(`/notes/${id}`, { text: noteText });
+
 export const getNotes = () => {
   console.log("getNotes wird aufgerufen mit baseURL:", apiClient.defaults.baseURL);
   return apiClient.get('/notes'); 

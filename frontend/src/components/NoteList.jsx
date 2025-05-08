@@ -1,38 +1,24 @@
-import React from "react";
+import React from 'react';
+import NoteItem from './NoteItem'; // Importiere die neue Komponente
 
-function NoteList({ notes, onDeleteNote }) {
+// Die onEditNote Prop wird jetzt zur onUpdateNote
+function NoteList({ notes, onDeleteNote, onUpdateNote }) {
+  if (!Array.isArray(notes)) {
+    console.warn("NoteList erhielt 'notes' nicht als Array:", notes);
+    return <p>Notizdaten sind nicht im korrekten Format.</p>;
+  }
+
   return (
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      {notes.map(
-        (
-          note, 
-        ) => (
-          <li
-            key={note.id}
-            style={{
-              marginBottom: "0.5rem",
-              border: "1px solid #ccc",
-              padding: "0.5rem",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span>{note.text}</span> {/* Zeige note.text an */}
-            <button
-              onClick={() => onDeleteNote(note.id)}
-              style={{
-                padding: "0.2rem 0.5rem",
-                backgroundColor: "#FF0000",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Löschen
-            </button>
-          </li>
-        ),
-      )}
+    <ul style={{ listStyle: 'none', padding: 0 }}>
+      {notes.map((note) => (
+        // Rendere für jede Notiz eine NoteItem Komponente
+        <NoteItem
+          key={note.id}
+          note={note}
+          onDelete={onDeleteNote} // onDeleteNote wird weitergegeben
+          onUpdate={onUpdateNote} // onUpdateNote wird weitergegeben
+        />
+      ))}
     </ul>
   );
 }
