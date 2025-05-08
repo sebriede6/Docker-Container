@@ -4,7 +4,7 @@ const { DATA_FILE } = require('./src/config');
 const start = async () => {
   try {
     await initializeApp();
-    app.listen(PORT, '0.0.0.0', () => { // Lausche auf 0.0.0.0, um Verbindungen von anderen Containern zu ermöglichen
+    app.listen(PORT, '0.0.0.0', () => { 
       console.log(`Backend API läuft auf Port ${PORT}`);
       console.log(`Daten werden in/aus ${DATA_FILE} gelesen/geschrieben.`);
     });

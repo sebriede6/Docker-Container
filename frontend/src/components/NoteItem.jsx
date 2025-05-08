@@ -35,31 +35,31 @@ function NoteItem({ note, onDelete, onUpdate }) {
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
             style={{ flexGrow: 1, marginRight: '0.5rem' }}
-            autoFocus // Fokussiere das Input-Feld direkt
+            autoFocus 
           />
           <button
             onClick={handleUpdate}
-            style={{ marginRight: '0.5rem', backgroundColor: '#90EE90' /* Hellgrün */ }}
+            style={{ marginRight: '0.5rem', backgroundColor: '#008000' /* Hellgrün */ }}
           >
             Speichern
           </button>
           <button
             onClick={handleCancelEdit}
-            style={{ backgroundColor: '#D3D3D3' /* Hellgrau */ }}
+            style={{ backgroundColor: '#1F2937' /* Hellgrau */ }}
           >
             Abbrechen
           </button>
         </>
       ) : (
-        // Ansicht im Anzeigemodus
+        
         <>
           <span>{note.text}</span>
           <div>
             <button
-              onClick={() => setIsEditing(true)} // Starte Bearbeitungsmodus
+              onClick={() => setIsEditing(true)} 
               style={{
                 padding: '0.2rem 0.5rem',
-                backgroundColor: '#FFFF00',
+                backgroundColor: '#1F2937',
                 border: 'none',
                 cursor: 'pointer',
                 marginRight: '0.5rem',

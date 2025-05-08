@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import NoteForm from './components/NoteForm';
-import NoteList from './components/NoteList'; // Verwendet jetzt NoteItem intern
-import { getNotes, addNote, updateNote, deleteNote } from './apiClient'; // API-Funktionen
+import NoteList from './components/NoteList'; 
+import { getNotes, addNote, updateNote, deleteNote } from './apiClient'; 
 import './App.css';
 
 const API_BASE_URL = '/api';
@@ -14,10 +14,10 @@ function App() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    // Verwende die importierte Funktion
+    
     getNotes()
       .then((response) => {
-        // Axios gibt Daten in response.data zurück
+        
         setNotes(Array.isArray(response.data) ? response.data : []);
       })
       .catch((err) => {
@@ -32,7 +32,7 @@ function App() {
 
   const handleAddNote = (noteText) => {
     setError(null);
-    // Verwende die importierte Funktion
+    
     addNote(noteText)
       .then((response) => {
         setNotes((prevNotes) => [...prevNotes, response.data || response]);
@@ -43,10 +43,10 @@ function App() {
       });
   };
 
-  // Umbenannt von handleEditNote und ruft updateNote auf
+  
   const handleUpdateNote = (idToUpdate, newText) => {
     setError(null);
-    // Verwende die importierte Funktion
+    
     updateNote(idToUpdate, newText)
       .then((response) => {
         setNotes((prevNotes) =>
@@ -63,7 +63,7 @@ function App() {
 
   const handleDeleteNote = (idToDelete) => {
     setError(null);
-    // Verwende die importierte Funktion
+    
     deleteNote(idToDelete)
       .then(() => {
         setNotes((prevNotes) =>
@@ -85,7 +85,7 @@ function App() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {!loading && !error && (
-        // Übergib handleUpdateNote als onUpdateNote Prop
+        
         <NoteList
           notes={notes}
           onDeleteNote={handleDeleteNote}
