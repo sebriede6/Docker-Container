@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const cors = require('cors');
 const noteRoutes = require('./routes/noteRoutes'); // Bleibt gleich

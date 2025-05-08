@@ -1,4 +1,3 @@
-// frontend/src/components/NoteList.jsx
 import React from "react";
 
 function NoteList({ notes, onDeleteNote }) {
@@ -6,7 +5,7 @@ function NoteList({ notes, onDeleteNote }) {
     <ul style={{ listStyle: "none", padding: 0 }}>
       {notes.map(
         (
-          note, // Verwende note.id als key
+          note, 
         ) => (
           <li
             key={note.id}
