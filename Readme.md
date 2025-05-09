@@ -1,6 +1,3 @@
-
----
-
 ```markdown
 # React Docker Notizblock App (Full-Stack mit Docker Compose)
 
@@ -11,12 +8,12 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 
 ## Projektstruktur
 
-```
+```text
 .
 ├── .dockerignore
-├── .env                # (LOKAL, NICHT IN GIT!)
+├── .env                  # (LOKAL, NICHT IN GIT!)
 ├── .gitignore
-├── README.md
+├── README.md             # Diese Datei
 ├── docker-compose.yml
 ├── sql_schema_and_queries.md
 │
@@ -45,7 +42,7 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
     ├── nginx.conf
     ├── package-lock.json
     ├── package.json
-    ├── tailwind.config.js # (Falls verwendet)
+    ├── tailwind.config.js # (Falls Tailwind CSS verwendet wird)
     ├── vite.config.js
     ├── public/
     │   └── vite.svg
@@ -58,11 +55,14 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
             ├── NoteForm.jsx
             ├── NoteItem.jsx
             └── NoteList.jsx
+```
+
 ## Screenshots
 
 Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
 
 [![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
+*(Hinweis: Stelle sicher, dass der Pfad zu deinem Screenshot-Vorschau-Bild (`assets/Screenshot...png`) korrekt ist und der Ordner `assets` mit den Bildern im Repository ist, oder entferne diesen Screenshot-Link, falls nicht zutreffend.)*
 
 
 ## Features
@@ -117,7 +117,7 @@ Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Scre
     ```bash
     docker compose ps
     ```
-    Alle Services (frontend, backend, database) sollten als `Up` oder `running` angezeigt werden. Der `database`-Service sollte zudem `(healthy)` im Status anzeigen, falls der Healthcheck wie in der Vorlage definiert ist.
+    Alle Services (frontend, backend, database) sollten als `Up` oder `running` angezeigt werden. Der `database`-Service sollte zudem `(healthy)` im Status anzeigen (falls der Healthcheck in deiner `docker-compose.yml` für die DB aktiv ist).
 
 5.  **Anwendung im Browser aufrufen:**
     Öffne deinen Webbrowser und gehe zu `http://localhost:8080`.
@@ -125,7 +125,7 @@ Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Scre
 ## Wichtige Services und Ports
 
 *   **Frontend (Nginx):** Erreichbar unter `http://localhost:8080` (Host-Port 8080 gemappt auf Container-Port 80).
-*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder dem Wert von `BACKEND_PORT`). API-Aufrufe vom Frontend erfolgen über den Nginx-Proxy auf dem Pfad `/api`. Für direktes Debugging ist kein Host-Port standardmäßig gemappt (kann bei Bedarf in `docker-compose.yml` hinzugefügt werden).
+*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder dem Wert von `BACKEND_PORT`). API-Aufrufe vom Frontend erfolgen über den Nginx-Proxy auf dem Pfad `/api`.
 *   **Datenbank (PostgreSQL):** Lauscht intern im Docker-Netzwerk auf Port 5432. Ist optional auf Host-Port `5433` gemappt (siehe `docker-compose.yml`) für direkten Zugriff mit DB-Tools.
 
 ## Logs anzeigen
@@ -161,7 +161,4 @@ Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Scre
 ## SQL Recap & Datenmodell
 
 Eine theoretische Ausarbeitung eines relationalen Datenbankmodells (Schema-Definition mit `CREATE TABLE` und CRUD-SQL-Abfragen), das thematisch zur Anwendung passt, befindet sich in der Datei `sql_schema_and_queries.md`.
-
----
 ```
-
