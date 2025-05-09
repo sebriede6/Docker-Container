@@ -62,7 +62,7 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
 
 [![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
-*(Hinweis: Stelle sicher, dass der Pfad zu deinem Screenshot-Vorschau-Bild (`assets/Screenshot...png`) korrekt ist und der Ordner `assets` mit den Bildern im Repository ist, oder entferne diesen Screenshot-Link, falls nicht zutreffend.)*
+
 
 
 ## Features
