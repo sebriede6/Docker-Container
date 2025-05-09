@@ -13,30 +13,51 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 
 ```
 .
+├── .dockerignore
+├── .env                # (LOKAL, NICHT IN GIT!)
+├── .gitignore
+├── README.md
+├── docker-compose.yml
+├── sql_schema_and_queries.md
+│
 ├── backend/
-│   ├── data/             # (Automatisch erstellt für notes.json durch Anwendungslogik)
-│   ├── src/              # Modulare Backend-Struktur (config, controllers, routes, services, app.js)
-│   ├── server.js         # Backend-Startpunkt
-│   ├── Dockerfile        # Dockerfile für das Backend
+│   ├── .dockerignore
+│   ├── Dockerfile
+│   ├── package-lock.json
 │   ├── package.json
-│   └── .dockerignore
-├── frontend/
-│   ├── public/
-│   ├── src/              # React-Komponenten, API-Client, CSS
-│   │   ├── components/
-│   │   └── ...
-│   ├── Dockerfile        # Multi-Stage Dockerfile für das Frontend
-│   ├── nginx.conf        # Nginx-Konfiguration (Reverse Proxy)
-│   ├── vite.config.js    # Vite-Konfiguration (mit Proxy für lokale Entwicklung)
-│   ├── package.json
-│   └── .dockerignore
-├── .env                  # (LOKAL, NICHT IN GIT!) Umgebungsvariablen für Docker Compose
-├── .gitignore            # Globales Gitignore
-├── .dockerignore         # Globales Dockerignore (optional)
-├── docker-compose.yml    # Docker Compose Konfiguration
-├── README.md             # Diese Datei
-└── sql_schema_and_queries.md # Theoretische SQL-Datenbank Ausarbeitung
-```
+│   ├── server.js
+│   ├── data/           # (Automatisch erstellt)
+│   └── src/
+│       ├── app.js
+│       ├── config/
+│       │   └── index.js
+│       ├── controllers/
+│       │   └── noteController.js
+│       ├── routes/
+│       │   └── noteRoutes.js
+│       └── services/
+│           └── fileService.js
+│
+└── frontend/
+    ├── .dockerignore
+    ├── Dockerfile
+    ├── index.html
+    ├── nginx.conf
+    ├── package-lock.json
+    ├── package.json
+    ├── tailwind.config.js # (Falls verwendet)
+    ├── vite.config.js
+    ├── public/
+    │   └── vite.svg
+    └── src/
+        ├── App.css
+        ├── App.jsx
+        ├── index.css
+        ├── main.jsx
+        └── components/
+            ├── NoteForm.jsx
+            ├── NoteItem.jsx
+            └── NoteList.jsx
 ## Screenshots
 
 Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
