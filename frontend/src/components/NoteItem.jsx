@@ -8,11 +8,11 @@ function NoteItem({ note, onDelete, onUpdate }) {
     if (editText.trim() && editText.trim() !== note.text) {
       onUpdate(note.id, editText.trim());
     }
-    setIsEditing(false); // Bearbeitungsmodus beenden
+    setIsEditing(false); 
   };
 
   const handleCancelEdit = () => {
-    setEditText(note.text); // Text zurücksetzen
+    setEditText(note.text); 
     setIsEditing(false);
   };
 
@@ -28,7 +28,7 @@ function NoteItem({ note, onDelete, onUpdate }) {
       }}
     >
       {isEditing ? (
-        // Ansicht im Bearbeitungsmodus
+       
         <>
           <input
             type="text"

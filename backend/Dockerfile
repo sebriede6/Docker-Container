@@ -1,10 +1,11 @@
 FROM node:lts-alpine
-WORKDIR /app
 
+RUN apk add --no-cache wget ca-certificates
+
+WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
-
 
 COPY . .
 

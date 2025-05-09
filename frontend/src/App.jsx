@@ -78,7 +78,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Mini Notizblock (Full-Stack)</h1>
+      <h1>Mini Notizblock</h1>
       <NoteForm onAddNote={handleAddNote} />
 
       {loading && <p>Lade Notizen...</p>}

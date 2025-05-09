@@ -1,162 +1,146 @@
-# Das Repository enthält eine theoretische Ausarbeitung zum Datenbankshema. Man findet sie in der sql_shema_and_query.md
 
-# Full-Stack Notizblock Anwendung mit Docker, Netzwerk & Reverse Proxy
+---
 
-Dies ist eine Full-Stack-Webanwendung, bestehend aus einem React-Frontend und einer Node.js/Express-API als Backend. Beide Komponenten sind separat containerisiert. Die Kommunikation zwischen Frontend und Backend erfolgt über ein dediziertes Docker-Netzwerk, wobei Nginx im Frontend-Container als Reverse Proxy für API-Aufrufe dient.
+```markdown
+# React Docker Notizblock App (Full-Stack mit Docker Compose)
 
-Das Backend speichert die Notizdaten persistent in einer Datei (`notes.json`) innerhalb eines Docker Volumes (`my-backend-data`), um sicherzustellen, dass die Daten auch nach Neustarts oder Neuerstellungen des Backend-Containers erhalten bleiben.
+Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die gesamte Anwendung wird mit Docker Compose orchestriert und beinhaltet:
+*   Ein Frontend, das mit Vite gebaut und von Nginx als Webserver und Reverse Proxy ausgeliefert wird.
+*   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer JSON-Datei speichert.
+*   Eine PostgreSQL-Datenbank für zukünftige Erweiterungen (momentan noch nicht aktiv vom Backend genutzt, aber die Zugangsdaten werden geloggt).
 
 ## Projektstruktur
 
 ```
-react-docker-notizblock/
-├── README.md                 
-├── assets/                   
-│   ├── Screenshot_App_API_Call.png  
-│   ├── Screenshot_Docker_Netzwerk.png 
-│   ├── Screenshot_Persistenz_Vorher.png 
-│   └── Screenshot_Persistenz_Nachher.png
+.
 ├── backend/
-│   ├── .dockerignore
-│   ├── Dockerfile
+│   ├── data/             # (Automatisch erstellt für notes.json durch Anwendungslogik)
+│   ├── src/              # Modulare Backend-Struktur (config, controllers, routes, services, app.js)
+│   ├── server.js         # Backend-Startpunkt
+│   ├── Dockerfile        # Dockerfile für das Backend
 │   ├── package.json
-│   ├── package-lock.json
-│   ├── server.js           
-│   ├── data/                
-│   │                         
-│   └── src/
-│       ├── app.js
-│       ├── config/
-│       │   └── index.js      
-│       ├── controllers/
-│       │   └── noteController.js
-│       ├── routes/
-│       │   └── noteRoutes.js
-│       └── services/
-│           └── fileService.js
+│   └── .dockerignore
 ├── frontend/
-│   ├── .dockerignore
-│   ├── .env                  
-│   ├── .env.local            
-│   ├── .gitignore            
-│   ├── Dockerfile
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── nginx.conf           
+│   ├── public/
+│   ├── src/              # React-Komponenten, API-Client, CSS
+│   │   ├── components/
+│   │   └── ...
+│   ├── Dockerfile        # Multi-Stage Dockerfile für das Frontend
+│   ├── nginx.conf        # Nginx-Konfiguration (Reverse Proxy)
+│   ├── vite.config.js    # Vite-Konfiguration (mit Proxy für lokale Entwicklung)
 │   ├── package.json
-│   ├── package-lock.json
-│   ├── README.md             
-│   ├── vite.config.js
-│   └── src/
-│       ├── apiClient.js
-│       ├── App.css
-│       ├── App.jsx
-│       ├── index.css
-│       ├── main.jsx
-│       └── components/
-│           ├── NoteForm.jsx
-│           └── NoteList.jsx
-└── .gitignore                
+│   └── .dockerignore
+├── .env                  # (LOKAL, NICHT IN GIT!) Umgebungsvariablen für Docker Compose
+├── .gitignore            # Globales Gitignore
+├── .dockerignore         # Globales Dockerignore (optional)
+├── docker-compose.yml    # Docker Compose Konfiguration
+├── README.md             # Diese Datei
+└── sql_schema_and_queries.md # Theoretische SQL-Datenbank Ausarbeitung
 ```
-
 ## Screenshots
 
 Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
 
 [![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
 
-## Persistenz im Backend
 
-Das Backend speichert Notizdaten in der Datei `/app/data/notes.json` innerhalb seines Containers. Um diese Daten persistent zu machen, wird ein **benanntes Docker Volume** (`my-backend-data`) verwendet. Dieses Volume wird von Docker verwaltet und stellt sicher, dass die Daten erhalten bleiben, auch wenn der Backend-Container gestoppt, entfernt oder neu erstellt wird. Beim Starten des Backend-Containers wird dieses Volume in den Pfad `/app/data` im Container gemountet.
+## Features
 
-## Nginx Reverse Proxy im Frontend
+*   Notizen anzeigen
+*   Neue Notizen hinzufügen
+*   Bestehende Notizen bearbeiten (inline)
+*   Notizen löschen
+*   Backend-Datenpersistenz mittels JSON-Datei (über Docker Volume gemountet)
+*   Vollständig containerisiert mit Docker: Frontend, Backend, Datenbank.
+*   Orchestrierung mit Docker Compose.
+*   Frontend mit Nginx Reverse Proxy für API-Aufrufe an das Backend.
+*   Logging von (Dummy-)Datenbank-Umgebungsvariablen im Backend beim Start.
 
-Das Frontend (eine React Single Page Application) wird von einem Nginx-Webserver ausgeliefert, der im Frontend-Docker-Container läuft. Nginx dient hier zusätzlich als **Reverse Proxy** für API-Anfragen:
+## Voraussetzungen
 
-*   **Zweck:**
-    *   Das Frontend, das im Browser des Benutzers unter `http://localhost:8080` läuft, sendet API-Anfragen an relative Pfade ( `/api/notes`).
-    *   Nginx fängt diese Anfragen ab und leitet sie an den Backend-Service (`http://backend-service:3000/api/notes`) im internen Docker-Netzwerk weiter.
-    *   Dies vermeidet CORS-Probleme und entkoppelt die vom Browser verwendete URL von der internen Netzwerkadresse des Backends.
-*   **Konfiguration:**
-    *   Die Datei `frontend/nginx.conf` enthält eine `location /api/`-Direktive.
-    *   Die `proxy_pass`-Direktive ist auf `http://backend-service:3000;` gesetzt. `backend-service` ist der Name des Backend-Containers im gemeinsamen Docker-Netzwerk.
+*   Docker
+*   Docker Compose (ist Teil von Docker Desktop)
+*   Node.js und npm (nur für lokale Entwicklung ohne Docker)
+*   Git
 
-## Anwendung bauen und starten (mit Docker Netzwerk & Reverse Proxy)
+## Setup und Start mit Docker Compose
 
-Stelle sicher, dass Docker auf deinem System installiert ist und läuft.
+1.  **Repository klonen:**
+    ```bash
+    git clone <dein-repository-url>
+    cd <projekt-name>
+    ```
+2.  **(Optional, aber empfohlen) Umgebungsvariablen konfigurieren:**
+    Erstelle eine Datei namens `.env` im Wurzelverzeichnis des Projekts (auf derselben Ebene wie `docker-compose.yml`). Docker Compose liest diese Datei automatisch.
+    Füge folgenden Inhalt ein und passe die Werte bei Bedarf an:
+    ```env
+    # .env (Beispielinhalt)
+    DB_USER=myuser
+    DB_PASSWORD=supersecretpassword
+    DB_NAME=notizblockdb
+    BACKEND_PORT=3000
+    # LOG_LEVEL=debug # Optional, um das Loglevel des Backends zu steuern
+    ```
+    **Wichtig:** Stelle sicher, dass die `.env`-Datei in deiner `.gitignore`-Datei aufgeführt ist, um zu verhindern, dass sensible Daten in Git committet werden.
 
-### 1. Docker Netzwerk erstellen
+3.  **Anwendung mit Docker Compose bauen und starten:**
+    Führe im Wurzelverzeichnis des Projekts (wo die `docker-compose.yml` liegt) folgenden Befehl aus:
+    ```bash
+    docker compose up --build -d
+    ```
+    *   `--build`: Baut die Images neu, falls Änderungen in den Dockerfiles oder im Code-Kontext vorliegen.
+    *   `-d`: Startet die Container im Detached-Modus (im Hintergrund).
 
-Ein dediziertes Bridge-Netzwerk ermöglicht die Kommunikation zwischen den Containern über ihre Namen.
-```bash
-docker network create mein-app-netzwerk
+4.  **Status überprüfen:**
+    Nach kurzer Zeit (besonders die Datenbank benötigt einen Moment zum Initialisieren), überprüfe den Status:
+    ```bash
+    docker compose ps
+    ```
+    Alle Services (frontend, backend, database) sollten als `Up` oder `running` angezeigt werden. Der `database`-Service sollte zudem `(healthy)` im Status anzeigen, falls der Healthcheck wie in der Vorlage definiert ist.
+
+5.  **Anwendung im Browser aufrufen:**
+    Öffne deinen Webbrowser und gehe zu `http://localhost:8080`.
+
+## Wichtige Services und Ports
+
+*   **Frontend (Nginx):** Erreichbar unter `http://localhost:8080` (Host-Port 8080 gemappt auf Container-Port 80).
+*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder dem Wert von `BACKEND_PORT`). API-Aufrufe vom Frontend erfolgen über den Nginx-Proxy auf dem Pfad `/api`. Für direktes Debugging ist kein Host-Port standardmäßig gemappt (kann bei Bedarf in `docker-compose.yml` hinzugefügt werden).
+*   **Datenbank (PostgreSQL):** Lauscht intern im Docker-Netzwerk auf Port 5432. Ist optional auf Host-Port `5433` gemappt (siehe `docker-compose.yml`) für direkten Zugriff mit DB-Tools.
+
+## Logs anzeigen
+
+*   Logs aller Services:
+    ```bash
+    docker compose logs
+    ```
+*   Logs eines spezifischen Services (z.B. Backend):
+    ```bash
+    docker compose logs backend
+    ```
+*   Logs eines Services live verfolgen:
+    ```bash
+    docker compose logs -f backend
+    ```
+
+## Anwendung stoppen
+
+*   Um die Container zu stoppen:
+    ```bash
+    docker compose stop
+    ```
+*   Um die Container zu stoppen und zu entfernen (Netzwerke bleiben bestehen, benannte Volumes auch):
+    ```bash
+    docker compose down
+    ```
+*   Um die Container zu stoppen, zu entfernen UND alle benannten Volumes zu löschen, die in der `docker-compose.yml` definiert sind (ACHTUNG: Datenverlust!):
+    ```bash
+    docker compose down -v
+    ```
+
+## SQL Recap & Datenmodell
+
+Eine theoretische Ausarbeitung eines relationalen Datenbankmodells (Schema-Definition mit `CREATE TABLE` und CRUD-SQL-Abfragen), das thematisch zur Anwendung passt, befindet sich in der Datei `sql_schema_and_queries.md`.
+
+---
 ```
-
-### 2. Backend bauen und starten
-
-**Image bauen:**
-```bash
-cd backend
-docker build -t my-backend-api:network-proxy .
-cd ..
-```
-
-**Container starten:**
-Der Backend-Container wird mit dem Netzwerk verbunden, erhält einen Namen, nutzt das persistente Volume und optional wird ein Host-Port für direktes Debugging gemappt.
-```bash
-docker run -d \
-  --name backend-service \
-  --network mein-app-netzwerk \
-  -v my-backend-data:/app/data \
-  -p 8081:3000 \
-  my-backend-api:network-proxy
-```
-*(Hinweis: Das Port-Mapping `-p 8081:3000` ist für dieses Setup optional, da die Kommunikation primär über Nginx im Frontend-Container laufen soll. Es kann aber zum direkten Testen der API nützlich sein.)*
-
-### 3. Frontend bauen und starten
-
-**Image bauen:**
-Das Build-Argument `VITE_API_URL` wird auf den relativen Pfad `/api` gesetzt, den Nginx als Proxy-Basis verwendet. Dein JavaScript-Code (`apiClient.js`) ist bereits so angepasst, dass er diesen relativen Pfad nutzt.
-```bash
-cd frontend
-docker build --build-arg VITE_API_URL=/api -t my-frontend-app:network-proxy .
-cd ..
-```
-
-**Container starten:**
-Der Frontend-Container wird ebenfalls mit dem Netzwerk verbunden und sein Nginx-Port (80) auf den Host-Port 8080 gemappt.
-```bash
-docker run -d \
-  --name frontend-app \
-  --network mein-app-netzwerk \
-  -p 8080:80 \
-  my-frontend-app:network-proxy
-```
-
-### 4. Anwendung im Browser aufrufen
-
-Öffne deinen Webbrowser und navigiere zu:
-`http://localhost:8080`
-
-Du solltest nun die Notizblock-Anwendung sehen. API-Aufrufe gehen an `http://localhost:8080/api/...` und werden von Nginx an das Backend weitergeleitet.
-
-1.  **Weg einer API-Anfrage:**
-    Browser (auf `localhost:8080`) -> sendet Anfrage an `http://localhost:8080/api/notes` -> Host leitet Anfrage an Port 8080 weiter -> Frontend-Container (`frontend-app`) auf Port 80 (Nginx) -> Nginx's `location /api/`-Block fängt die Anfrage ab -> Nginx leitet die Anfrage per `proxy_pass` an `http://backend-service:3000/api/notes` (oder den entsprechenden internen Pfad, je nach `proxy_pass` Konfiguration) über das Docker-Netzwerk `mein-app-netzwerk` -> Backend-Container (`backend-service`) empfängt Anfrage auf Port 3000 -> Backend verarbeitet Anfrage und sendet Antwort zurück.
-
-2.  **Auflösung von `backend-service:3000`:**
-    Der Browser läuft auf dem Host-System (oder einem anderen Rechner) und hat keine Kenntnis vom internen DNS-System des Docker-Netzwerks `mein-app-netzwerk`. Docker stellt jedoch für Container innerhalb desselben benutzerdefinierten Netzwerks einen internen DNS-Service bereit, der die Namen der anderen Container im Netzwerk (hier `backend-service`) zu ihren internen IP-Adressen auflösen kann. Nginx im `frontend-app`-Container kann daher `backend-service` auflösen.
-
-3.  **Rolle der Nginx-Konfiguration:**
-    Die benutzerdefinierte Nginx-Konfiguration (`frontend/nginx.conf`) implementiert das Reverse-Proxy-Muster. Der relevante `location /api/`-Block fängt alle Anfragen ab, die mit `/api/` beginnen. Anstatt zu versuchen, diese als statische Dateien auszuliefern, leitet er (`proxy_pass`) sie an den angegebenen Backend-Service (`http://backend-service:3000`) weiter. Er fungiert als Vermittler, der Anfragen vom extern erreichbaren Frontend an das intern laufende Backend weitergibt.
-
-4.  **Änderung von `VITE_API_URL`:**
-    *   **Vorherige Aufgabe (direkte Kommunikation über Host-Ports):** `VITE_API_URL` war  `http://localhost:8081/api`. Der Browser musste das Backend direkt über einen gemappten Host-Port erreichen.
-    *   **Aktuelle Aufgabe (Reverse Proxy):** `VITE_API_URL` wurde zu `/api` geändert. Der JavaScript-Code im Browser (`apiClient.js`) wurde angepasst, um diesen relativen Pfad zu verwenden. Die Anfragen gehen an denselben Host und Port wie das Frontend selbst ( `http://localhost:8080/api/...`). Nginx im Frontend-Container fängt diesen Pfad ab und leitet ihn intern an das Backend weiter. Der eigentliche Hostname und Port des Backends ist für den Browser nicht mehr direkt relevant.
-
-5.  **Vorteile des Reverse Proxy Musters:**
-    *   **CORS-Vermeidung:** Da alle Anfragen vom Browser an denselben Ursprung (Host und Port,  `localhost:8080`) gehen, treten keine Cross-Origin Resource Sharing (CORS) Probleme auf, die sonst auftreten würden, wenn der Browser von `localhost:8080` direkt auf `localhost:8081` zugreifen würde.
-    *   **Vereinfachte URL-Struktur:** Der Benutzer und das Frontend sehen eine einheitliche URL-Basis.
-    *   **Zentraler Eingangspunkt:** Nginx kann als zentraler Punkt für SSL-Terminierung, Load Balancing (bei mehreren Backend-Instanzen), Caching, Request-Filterung oder -Modifikation dienen.
-    *   **Sicherheit:** Das Backend muss nicht direkt über einen Host-Port nach außen exponiert werden; nur der Frontend-Proxy ist direkt erreichbar.
-    *   **Entkopplung:** Die interne Netzwerkstruktur und die Ports der Backend-Dienste können geändert werden, ohne dass das Frontend oder der Browser davon betroffen sind, solange die Proxy-Konfiguration angepasst wird.
 
