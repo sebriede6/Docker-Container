@@ -1,10 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const noteController = require('../controllers/noteController');
+import express from 'express';
+import * as noteController from '../controllers/noteController.js';
 
-// Route für Notizen
-router.get('/notes', noteController.getAllNotes);
-router.post('/notes', noteController.createNote);
-router.delete('/notes/:id', noteController.deleteNoteById);
+const router = express.Router();
+
+
+router.get('/', noteController.getAllNotes);
+router.post('/', noteController.createNote);
+router.get('/:id', noteController.getNoteById); // Hinzugefügt für Konsistenz, falls getNoteById auch hierüber laufen soll
 router.put('/:id', noteController.updateNoteById);
-module.exports = router;
+router.delete('/:id', noteController.deleteNoteById);
+
+export default router;
