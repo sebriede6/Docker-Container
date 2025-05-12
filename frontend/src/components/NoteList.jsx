@@ -1,8 +1,7 @@
 import React from 'react';
-import NoteItem from './NoteItem'; 
+import NoteItem from './NoteItem';
 
-
-function NoteList({ notes, onDeleteNote, onUpdateNote }) {
+function NoteList({ notes, onDeleteNote, onUpdateNote, onToggleComplete }) { // onToggleComplete als Prop empfangen
   if (!Array.isArray(notes)) {
     console.warn("NoteList erhielt 'notes' nicht als Array:", notes);
     return <p>Notizdaten sind nicht im korrekten Format.</p>;
@@ -11,12 +10,12 @@ function NoteList({ notes, onDeleteNote, onUpdateNote }) {
   return (
     <ul style={{ listStyle: 'none', padding: 0 }}>
       {notes.map((note) => (
-        
         <NoteItem
           key={note.id}
           note={note}
-          onDelete={onDeleteNote} 
-          onUpdate={onUpdateNote} 
+          onDelete={onDeleteNote}
+          onUpdate={onUpdateNote}
+          onToggle={onToggleComplete} // Handler an NoteItem weitergeben
         />
       ))}
     </ul>

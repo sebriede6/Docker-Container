@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import NoteForm from './components/NoteForm';
-import NoteList from './components/NoteList'; 
-import { getNotes, addNote, updateNote, deleteNote } from './apiClient'; 
+import NoteList from './components/NoteList';
+import { getNotes, addNote, updateNote, deleteNote, toggleNoteCompleted } from './apiClient'; // toggleNoteCompleted importieren
 import './App.css';
-
-const API_BASE_URL = '/api';
 
 function App() {
   const [notes, setNotes] = useState([]);
@@ -14,10 +12,8 @@ function App() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    
     getNotes()
       .then((response) => {
-        
         setNotes(Array.isArray(response.data) ? response.data : []);
       })
       .catch((err) => {
@@ -32,7 +28,6 @@ function App() {
 
   const handleAddNote = (noteText) => {
     setError(null);
-    
     addNote(noteText)
       .then((response) => {
         setNotes((prevNotes) => [...prevNotes, response.data || response]);
@@ -43,10 +38,8 @@ function App() {
       });
   };
 
-  
   const handleUpdateNote = (idToUpdate, newText) => {
     setError(null);
-    
     updateNote(idToUpdate, newText)
       .then((response) => {
         setNotes((prevNotes) =>
@@ -63,7 +56,6 @@ function App() {
 
   const handleDeleteNote = (idToDelete) => {
     setError(null);
-    
     deleteNote(idToDelete)
       .then(() => {
         setNotes((prevNotes) =>
@@ -76,6 +68,24 @@ function App() {
       });
   };
 
+  // Neuer Handler zum Umschalten des "completed"-Status
+  const handleToggleComplete = (idToToggle) => {
+      setError(null);
+      toggleNoteCompleted(idToToggle)
+          .then((response) => {
+              setNotes((prevNotes) =>
+                  prevNotes.map((note) =>
+                      note.id === idToToggle ? (response.data || response) : note
+                  )
+              );
+          })
+          .catch((err) => {
+              console.error('Fehler beim Umschalten des Status:', err);
+              setError('Fehler beim Umschalten des Status der Notiz.');
+          });
+  };
+
+
   return (
     <div className="App">
       <h1>Mini Notizblock</h1>
@@ -85,11 +95,11 @@ function App() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {!loading && !error && (
-        
         <NoteList
           notes={notes}
           onDeleteNote={handleDeleteNote}
           onUpdateNote={handleUpdateNote}
+          onToggleComplete={handleToggleComplete} // Handler weitergeben
         />
       )}
       {!loading && !error && notes.length === 0 && (

@@ -2,7 +2,7 @@ import pool from '../db/index.js';
 import { logger } from '../utils/logger.js';
 
 const getAllNotes = async () => {
-  const sql = 'SELECT id, text_content AS text, created_at, updated_at FROM notes ORDER BY created_at DESC';
+  const sql = 'SELECT id, text_content AS text, completed, created_at, updated_at FROM notes ORDER BY created_at DESC';
   try {
     const result = await pool.query(sql);
     logger.debug('Service: getAllNotes successful', { count: result.rowCount });
@@ -14,7 +14,7 @@ const getAllNotes = async () => {
 };
 
 const getNoteById = async (id) => {
-  const sql = 'SELECT id, text_content AS text, created_at, updated_at FROM notes WHERE id = $1';
+  const sql = 'SELECT id, text_content AS text, completed, created_at, updated_at FROM notes WHERE id = $1';
   const values = [id];
   try {
     const result = await pool.query(sql, values);
@@ -27,7 +27,7 @@ const getNoteById = async (id) => {
 };
 
 const createNote = async (text) => {
-  const sql = 'INSERT INTO notes (text_content) VALUES ($1) RETURNING id, text_content AS text, created_at, updated_at';
+  const sql = 'INSERT INTO notes (text_content) VALUES ($1) RETURNING id, text_content AS text, completed, created_at, updated_at';
   const values = [text];
   try {
     const result = await pool.query(sql, values);
@@ -40,7 +40,7 @@ const createNote = async (text) => {
 };
 
 const updateNoteById = async (id, text) => {
-  const sql = 'UPDATE notes SET text_content = $1 WHERE id = $2 RETURNING id, text_content AS text, created_at, updated_at';
+  const sql = 'UPDATE notes SET text_content = $1 WHERE id = $2 RETURNING id, text_content AS text, completed, created_at, updated_at';
   const values = [text, id];
   try {
     const result = await pool.query(sql, values);
@@ -68,10 +68,27 @@ const deleteNoteById = async (id) => {
   }
 };
 
+const toggleNoteCompletedById = async (id) => {
+    const sql = 'UPDATE notes SET completed = NOT completed WHERE id = $1 RETURNING id, text_content AS text, completed, created_at, updated_at';
+    const values = [id];
+    try {
+        const result = await pool.query(sql, values);
+        logger.info('Service: toggleNoteCompletedById successful', { id, updated: result.rowCount > 0 });
+        if (result.rowCount === 0) {
+            return null;
+        }
+        return result.rows[0];
+    } catch (err) {
+        logger.error('Service: Error in toggleNoteCompletedById', { error: err.message, stack: err.stack, sql, id });
+        throw new Error(`Database query failed while toggling completion status for note with id ${id}.`);
+    }
+};
+
 export {
   getAllNotes,
   getNoteById,
   createNote,
   updateNoteById,
-  deleteNoteById
+  deleteNoteById,
+  toggleNoteCompletedById // Neue Funktion exportieren
 };

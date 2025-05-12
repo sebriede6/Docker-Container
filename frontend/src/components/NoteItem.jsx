@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import './NoteItem.css'; 
 
-function NoteItem({ note, onDelete, onUpdate }) {
+function NoteItem({ note, onDelete, onUpdate, onToggle }) { // onToggle als Prop empfangen
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(note.text);
 
@@ -16,95 +17,57 @@ function NoteItem({ note, onDelete, onUpdate }) {
     setIsEditing(false);
   };
 
+  const handleCheckboxChange = () => {
+    onToggle(note.id); // Rufe den Handler aus App.jsx auf
+  };
+
+  const textClassName = `note-item-text ${note.completed ? 'completed' : ''}`;
+
   return (
-    <li
-      style={{
-        backgroundColor: '#3a3a3a',
-        marginBottom: '0.5rem',
-        border: '1px solid #ccc',
-        padding: '0.75rem 1rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderRadius: '4px',
-        wordBreak: 'break-word'
-      }}
-    >
+    <li className="note-item">
       {isEditing ? (
         <>
           <input
             type="text"
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            style={{
-              flexGrow: 1,
-              marginRight: '0.5rem',
-              padding: '0.4rem 0.6rem',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              backgroundColor: '#fff',
-              color: '#213547'
-            }}
+            className="note-item-edit-input"
             autoFocus
           />
-          <div>
-            <button
-              onClick={handleUpdate}
-              style={{
-                marginRight: '0.5rem',
-                backgroundColor: '#48bb78',
-                border: 'none',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                color: '#fff'
-              }}
-            >
-              Speichern
-            </button>
-            <button
-              onClick={handleCancelEdit}
-              style={{
-                backgroundColor: '#718096',
-                border: 'none',
-                padding: '0.3rem 0.8rem',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                color: '#fff'
-              }}
-            >
-              Abbrechen
-            </button>
+          <div className="note-item-actions">
+             <button
+               onClick={handleUpdate}
+               className="note-item-button save"
+             >
+               Speichern
+             </button>
+             <button
+               onClick={handleCancelEdit}
+               className="note-item-button cancel"
+             >
+               Abbrechen
+             </button>
           </div>
         </>
       ) : (
         <>
-          <span style={{ flexGrow: 1, marginRight: '1rem' }}>{note.text}</span>
-          <div>
+          <input
+            type="checkbox"
+            checked={note.completed}
+            onChange={handleCheckboxChange}
+            style={{ marginRight: '0.75rem', cursor: 'pointer' }} // Style für die Checkbox
+          />
+          <span className={textClassName}>{note.text}</span>
+           <div className="note-item-actions">
             <button
               onClick={() => setIsEditing(true)}
-              style={{
-                padding: '0.3rem 0.8rem',
-                backgroundColor: '#4a5568',
-                border: 'none',
-                cursor: 'pointer',
-                marginRight: '0.5rem',
-                color: '#ffffff',
-                borderRadius: '4px'
-              }}
+              className="note-item-button edit"
             >
               Bearbeiten
             </button>
             <button
               onClick={() => onDelete(note.id)}
-              style={{
-                padding: '0.3rem 0.8rem',
-                backgroundColor: '#e53e3e',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#ffffff',
-                borderRadius: '4px'
-              }}
+              className="note-item-button delete"
             >
               Löschen
             </button>

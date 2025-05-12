@@ -8,7 +8,7 @@ const getAllNotes = async (req, res, next) => {
     res.status(200).json(notes);
   } catch (error) {
     logger.error('Controller: Fehler in getAllNotes', { error: error.message });
-    next(error); 
+    next(error);
   }
 };
 
@@ -91,9 +91,7 @@ const deleteNoteById = async (req, res, next) => {
   try {
     const deleted = await noteDbService.deleteNoteById(noteId);
     if (deleted) {
-      
       res.status(200).json({ message: 'Notiz erfolgreich gelöscht', id: noteId });
-      
     } else {
       logger.warn(`Controller: Notiz nicht gefunden für Lösch-ID: ${noteId}`);
       res.status(404).json({ message: 'Notiz nicht gefunden' });
@@ -104,6 +102,28 @@ const deleteNoteById = async (req, res, next) => {
   }
 };
 
+const toggleNoteCompleted = async (req, res, next) => {
+    const noteId = parseInt(req.params.id, 10);
+
+    if (isNaN(noteId)) {
+        logger.warn('Controller: Ungültige ID in toggleNoteCompleted angefordert', { paramId: req.params.id });
+        return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+    }
+
+    logger.debug(`Controller: toggleNoteCompleted aufgerufen für ID: ${noteId}`);
+    try {
+        const updatedNote = await noteDbService.toggleNoteCompletedById(noteId);
+        if (updatedNote) {
+            res.status(200).json(updatedNote);
+        } else {
+            logger.warn(`Controller: Notiz nicht gefunden für Toggle ID: ${noteId}`);
+            res.status(404).json({ message: 'Notiz nicht gefunden' });
+        }
+    } catch (error) {
+        logger.error(`Controller: Fehler in toggleNoteCompleted für ID: ${noteId}`, { error: error.message });
+        next(error);
+    }
+};
 
 export {
   getAllNotes,
@@ -111,4 +131,5 @@ export {
   createNote,
   updateNoteById,
   deleteNoteById,
+  toggleNoteCompleted
 };
