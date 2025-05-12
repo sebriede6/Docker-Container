@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import noteRoutes from './routes/noteRoutes.js'; // Importiere den Router
-import { initializeNotes } from './controllers/noteController.js'; // Nur initializeNotes importieren
+import noteRoutes from './routes/noteRoutes.js'; 
+import { initializeNotes } from './controllers/noteController.js'; 
 import { PORT as configPort } from './config/index.js';
 
 const app = express();
@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Alle Notiz-Routen unter dem Präfix /api/notes einbinden
+
 app.use('/api/notes', noteRoutes);
 
 app.use((req, res, next) => {
@@ -23,7 +23,7 @@ app.use((err, req, res, next) => {
 
 const initializeApp = async () => {
   try {
-    await initializeNotes(); // Direkt initializeNotes aufrufen
+    await initializeNotes(); 
   } catch (error) {
     console.error("Fehler beim Initialisieren der App-Daten:", error);
     throw error;
