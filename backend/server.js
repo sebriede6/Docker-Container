@@ -1,31 +1,15 @@
-import app, { initializeApp, PORT } from './src/app.js';
-import { DATA_FILE } from './src/config/index.js';
-import winston from 'winston';
+import app, { PORT } from './src/app.js';
 
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.errors({ stack: true }),
-    winston.format.splat(),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'backend-api' },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ],
-});
+import { testConnection } from './src/db/index.js';
+import { logger } from './src/utils/logger.js';
+
+
 
 const startServer = async () => {
   try {
-    logger.info('Attempting to initialize application data...');
-    await initializeApp();
-    logger.info('Application data initialized successfully.');
+    logger.info('Attempting to connect to database...');
+    await testConnection(); 
+    logger.info('Database connection verified.');
 
     logger.info('--- Database Configuration (from ENV) ---');
     logger.info('DB_HOST:', { value: process.env.DB_HOST || 'N/A' });
@@ -37,12 +21,12 @@ const startServer = async () => {
 
     app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Backend API läuft auf Port ${PORT}`);
-      logger.info(`Daten werden in/aus ${DATA_FILE} gelesen/geschrieben (Dateipersistenz).`);
-      logger.info(`(Hinweis: Datenbankverbindung ist in dieser Aufgabe noch nicht implementiert.)`);
+      logger.info(`Verbunden mit PostgreSQL Datenbank: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);
     });
   } catch (error) {
-    logger.error("Kritischer Fehler beim Starten des Servers:", error);
-    process.exit(1);
+    
+    logger.error("Kritischer Fehler beim Starten des Servers (DB-Verbindung fehlgeschlagen?). Server wird beendet.", { error: error.message });
+    process.exit(1); 
   }
 };
 

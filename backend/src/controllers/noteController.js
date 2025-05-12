@@ -1,96 +1,111 @@
-import * as fileService from '../services/fileService.js';
+import * as noteDbService from '../services/noteDbService.js';
+import { logger } from '../utils/logger.js';
 
-let notes = [];
-let nextId = 1;
-
-const initializeNotes = async () => {
+const getAllNotes = async (req, res, next) => {
+  logger.debug('Controller: getAllNotes aufgerufen');
   try {
-    notes = await fileService.loadNotes();
-    if (notes.length > 0) {
-      nextId = Math.max(...notes.map(n => n.id)) + 1;
-    } else {
-      nextId = 1;
-    }
+    const notes = await noteDbService.getAllNotes();
+    res.status(200).json(notes);
   } catch (error) {
-    console.error("Controller: Error initializing notes:", error);
-    notes = [];
-    nextId = 1;
+    logger.error('Controller: Fehler in getAllNotes', { error: error.message });
+    next(error); 
   }
 };
 
-const getAllNotes = (req, res) => {
-  console.log('Controller: getAllNotes aufgerufen für Healthcheck oder Frontend');
-  res.status(200).json(notes);
-};
-
-const getNoteById = (req, res) => {
+const getNoteById = async (req, res, next) => {
   const noteId = parseInt(req.params.id, 10);
-  console.log(`Controller: getNoteById aufgerufen für ID: ${noteId}`);
-  const note = notes.find(n => n.id === noteId);
-  if (note) {
-    res.status(200).json(note);
-  } else {
-    res.status(404).json({ message: 'Notiz nicht gefunden' });
+   if (isNaN(noteId)) {
+     logger.warn('Controller: Ungültige ID in getNoteById angefordert', { paramId: req.params.id });
+     return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+  }
+  logger.debug(`Controller: getNoteById aufgerufen für ID: ${noteId}`);
+  try {
+    const note = await noteDbService.getNoteById(noteId);
+    if (note) {
+      res.status(200).json(note);
+    } else {
+      logger.warn(`Controller: Notiz nicht gefunden für ID: ${noteId}`);
+      res.status(404).json({ message: 'Notiz nicht gefunden' });
+    }
+  } catch (error) {
+    logger.error(`Controller: Fehler in getNoteById für ID: ${noteId}`, { error: error.message });
+    next(error);
   }
 };
 
 const createNote = async (req, res, next) => {
-  console.log('Controller: createNote aufgerufen mit Body:', req.body);
+  logger.debug('Controller: createNote aufgerufen mit Body:', req.body);
+  const { text } = req.body;
+
+  if (typeof text !== 'string' || text.trim() === '') {
+    logger.warn('Controller: Ungültiger Text in createNote', { body: req.body });
+    return res.status(400).json({ message: 'Text für Notiz fehlt oder ist ungültig' });
+  }
+
   try {
-    if (!req.body || !req.body.text || typeof req.body.text !== 'string' || req.body.text.trim() === '') {
-      return res.status(400).json({ message: 'Text für Notiz fehlt oder ist ungültig' });
-    }
-    const newNote = {
-      id: nextId++,
-      text: req.body.text.trim()
-    };
-    notes.push(newNote);
-    await fileService.saveNotes(notes);
+    const newNote = await noteDbService.createNote(text.trim());
     res.status(201).json(newNote);
   } catch (error) {
+    logger.error('Controller: Fehler in createNote', { error: error.message });
     next(error);
   }
 };
 
 const updateNoteById = async (req, res, next) => {
   const noteId = parseInt(req.params.id, 10);
-  console.log(`Controller: updateNoteById aufgerufen für ID: ${noteId} mit Body:`, req.body);
+  const { text } = req.body;
+
+  if (isNaN(noteId)) {
+    logger.warn('Controller: Ungültige ID in updateNoteById angefordert', { paramId: req.params.id });
+    return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+  }
+  if (typeof text !== 'string' || text.trim() === '') {
+    logger.warn('Controller: Ungültiger Text in updateNoteById', { body: req.body, id: noteId });
+    return res.status(400).json({ message: 'Neuer Text für Notiz fehlt oder ist ungültig' });
+  }
+
+  logger.debug(`Controller: updateNoteById aufgerufen für ID: ${noteId} mit Body:`, req.body);
   try {
-    if (!req.body || !req.body.text || typeof req.body.text !== 'string' || req.body.text.trim() === '') {
-       return res.status(400).json({ message: 'Neuer Text für Notiz fehlt oder ist ungültig' });
-    }
-    const noteIndex = notes.findIndex(n => n.id === noteId);
-    if (noteIndex > -1) {
-       notes[noteIndex].text = req.body.text.trim();
-       await fileService.saveNotes(notes);
-       res.status(200).json(notes[noteIndex]);
+    const updatedNote = await noteDbService.updateNoteById(noteId, text.trim());
+    if (updatedNote) {
+      res.status(200).json(updatedNote);
     } else {
+       logger.warn(`Controller: Notiz nicht gefunden für Update ID: ${noteId}`);
        res.status(404).json({ message: 'Notiz nicht gefunden' });
     }
   } catch(error) {
+      logger.error(`Controller: Fehler in updateNoteById für ID: ${noteId}`, { error: error.message });
       next(error);
   }
 };
 
 const deleteNoteById = async (req, res, next) => {
   const noteId = parseInt(req.params.id, 10);
-  console.log(`Controller: deleteNoteById aufgerufen für ID: ${noteId}`);
+
+  if (isNaN(noteId)) {
+    logger.warn('Controller: Ungültige ID in deleteNoteById angefordert', { paramId: req.params.id });
+    return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+  }
+
+  logger.debug(`Controller: deleteNoteById aufgerufen für ID: ${noteId}`);
   try {
-    const noteIndex = notes.findIndex(n => n.id === noteId);
-    if (noteIndex > -1) {
-      notes.splice(noteIndex, 1);
-      await fileService.saveNotes(notes);
+    const deleted = await noteDbService.deleteNoteById(noteId);
+    if (deleted) {
+      
       res.status(200).json({ message: 'Notiz erfolgreich gelöscht', id: noteId });
+      
     } else {
+      logger.warn(`Controller: Notiz nicht gefunden für Lösch-ID: ${noteId}`);
       res.status(404).json({ message: 'Notiz nicht gefunden' });
     }
   } catch (error) {
+    logger.error(`Controller: Fehler in deleteNoteById für ID: ${noteId}`, { error: error.message });
     next(error);
   }
 };
 
+
 export {
-  initializeNotes,
   getAllNotes,
   getNoteById,
   createNote,

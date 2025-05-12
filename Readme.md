@@ -1,10 +1,10 @@
 ```markdown
-# React Docker Notizblock App (Full-Stack mit Docker Compose)
+# React Docker Notizblock App (Full-Stack mit Docker Compose & PostgreSQL)
 
 Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die gesamte Anwendung wird mit Docker Compose orchestriert und beinhaltet:
 *   Ein Frontend, das mit Vite gebaut und von Nginx als Webserver und Reverse Proxy ausgeliefert wird.
-*   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer JSON-Datei speichert.
-*   Eine PostgreSQL-Datenbank für zukünftige Erweiterungen (momentan noch nicht aktiv vom Backend genutzt, aber die Zugangsdaten werden geloggt).
+*   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer **PostgreSQL-Datenbank** speichert.
+*   Eine PostgreSQL-Datenbank als dedizierter Service.
 
 ## Projektstruktur
 
@@ -15,7 +15,7 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 ├── .gitignore
 ├── README.md             # Diese Datei
 ├── docker-compose.yml
-├── sql_schema_and_queries.md
+├── sql_schema_and_queries.md # Theoretisches SQL Recap
 │
 ├── backend/
 │   ├── .dockerignore
@@ -23,17 +23,22 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 │   ├── package-lock.json
 │   ├── package.json
 │   ├── server.js
-│   ├── data/           # (Automatisch erstellt)
+│   ├── sql/                  # <-- NEU
+│   │   └── initial_schema.sql # <-- NEU: Manuelles Schema
 │   └── src/
 │       ├── app.js
 │       ├── config/
 │       │   └── index.js
 │       ├── controllers/
 │       │   └── noteController.js
+│       ├── db/                 # <-- NEU
+│       │   └── index.js        # <-- NEU: DB-Verbindung (Pool)
 │       ├── routes/
 │       │   └── noteRoutes.js
-│       └── services/
-│           └── fileService.js
+│       ├── services/
+│       │   └── noteDbService.js # <-- NEU: Ersetzt fileService
+│       └── utils/              # <-- NEU
+│           └── logger.js       # <-- NEU: Wiederverwendbarer Logger
 │
 └── frontend/
     ├── .dockerignore
@@ -42,7 +47,6 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
     ├── nginx.conf
     ├── package-lock.json
     ├── package.json
-    ├── tailwind.config.js # (Falls Tailwind CSS verwendet wird)
     ├── vite.config.js
     ├── public/
     │   └── vite.svg
@@ -54,15 +58,24 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
         └── components/
             ├── NoteForm.jsx
             ├── NoteItem.jsx
+            ├── NoteItem.css    # <-- NEU (falls du CSS-Klassen verwendest)
             └── NoteList.jsx
 ```
 
 ## Screenshots
 
-Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Screenshots in einem neuen Tab zu öffnen.
+**Aktuelle Screenshots (mit Datenbank-Persistenz):**
 
-[![Vorschau-Screenshot](assets/Screenshot%202025-05-07%20162916.png)](assets/)
+*   Funktionierende Anwendung im Browser (CRUD):
+    [![Anwendung läuft](assets/app_running_crud.png)](assets/app_running_crud.png)
 
+*   Beweis der Datenpersistenz (Daten nach DB-Neustart noch vorhanden):
+    [![DB Persistenz Test](assets/db_persistence_test.png)](assets/db_persistence_test.png)
+
+*    Manuell erstelltes Schema-Skript:
+    [![Schema Skript](assets/db_tool_schema.png)](assets/db_tool_schema.png)
+
+*   [![Schema Skript](assets/db_script.png)](assets/db_script.png)
 
 
 ## Features
@@ -71,17 +84,18 @@ Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Scre
 *   Neue Notizen hinzufügen
 *   Bestehende Notizen bearbeiten (inline)
 *   Notizen löschen
-*   Backend-Datenpersistenz mittels JSON-Datei (über Docker Volume gemountet)
+*   Backend-Datenpersistenz mittels **PostgreSQL-Datenbank** (über Docker Volume)
+*   Datenbankverbindung mit `pg` Treiber und **Connection Pooling**
+*   **Sichere API** durch parametrisierte SQL-Abfragen (Schutz vor SQL Injection)
 *   Vollständig containerisiert mit Docker: Frontend, Backend, Datenbank.
 *   Orchestrierung mit Docker Compose.
 *   Frontend mit Nginx Reverse Proxy für API-Aufrufe an das Backend.
-*   Logging von (Dummy-)Datenbank-Umgebungsvariablen im Backend beim Start.
+*   Logging wichtiger Ereignisse und DB-Verbindungsstatus.
 
 ## Voraussetzungen
 
 *   Docker
 *   Docker Compose (ist Teil von Docker Desktop)
-*   Node.js und npm (nur für lokale Entwicklung ohne Docker)
 *   Git
 
 ## Setup und Start mit Docker Compose
@@ -93,72 +107,87 @@ Ein Vorschau-Screenshot ist unten eingebettet. Klicke auf das Bild, um alle Scre
     ```
 2.  **(Optional, aber empfohlen) Umgebungsvariablen konfigurieren:**
     Erstelle eine Datei namens `.env` im Wurzelverzeichnis des Projekts (auf derselben Ebene wie `docker-compose.yml`). Docker Compose liest diese Datei automatisch.
-    Füge folgenden Inhalt ein und passe die Werte bei Bedarf an:
+    Füge folgenden Inhalt ein (passe die Werte bei Bedarf an, besonders `DB_PASSWORD`):
     ```env
     # .env (Beispielinhalt)
     DB_USER=myuser
     DB_PASSWORD=supersecretpassword
     DB_NAME=notizblockdb
     BACKEND_PORT=3000
-    # LOG_LEVEL=debug # Optional, um das Loglevel des Backends zu steuern
+    LOG_LEVEL=debug # Optional (z.B. debug, info, warn, error)
     ```
     **Wichtig:** Stelle sicher, dass die `.env`-Datei in deiner `.gitignore`-Datei aufgeführt ist, um zu verhindern, dass sensible Daten in Git committet werden.
 
-3.  **Anwendung mit Docker Compose bauen und starten:**
-    Führe im Wurzelverzeichnis des Projekts (wo die `docker-compose.yml` liegt) folgenden Befehl aus:
+3.  **Datenbank-Schema manuell erstellen (Einmalig für diese Aufgabe):**
+    Da diese Aufgabe das **manuelle Schema-Management** demonstriert, muss die Tabelle *vor dem ersten vollständigen Start des Backends* erstellt werden.
+    *   **a) Nur Datenbank starten:**
+        ```bash
+        docker compose up -d database
+        ```
+    *   **b) Warten, bis DB bereit ist:** Überprüfe den Status mit `docker compose ps`, bis bei `postgres_db_service` der Status `(healthy)` angezeigt wird.
+        ```bash
+        docker compose ps
+        ```
+    *   **c) Schema anwenden:** Führe das SQL-Skript im laufenden DB-Container aus (ersetze `myuser` und `notizblockdb` falls du andere Werte in `.env` nutzt):
+        ```bash
+        docker exec -i postgres_db_service psql -U myuser -d notizblockdb < backend/sql/initial_schema.sql
+        ```
+        *(Bei Erfolg sollten keine Fehler, sondern Meldungen wie CREATE TABLE, NOTICE etc. erscheinen).*
+
+4.  **Gesamte Anwendung bauen und starten:**
+    Führe im Wurzelverzeichnis des Projekts folgenden Befehl aus:
     ```bash
     docker compose up --build -d
     ```
-    *   `--build`: Baut die Images neu, falls Änderungen in den Dockerfiles oder im Code-Kontext vorliegen.
+    *   `--build`: Baut die Images neu (wichtig nach Code-Änderungen).
     *   `-d`: Startet die Container im Detached-Modus (im Hintergrund).
 
-4.  **Status überprüfen:**
-    Nach kurzer Zeit (besonders die Datenbank benötigt einen Moment zum Initialisieren), überprüfe den Status:
+5.  **Status überprüfen:**
+    Überprüfe erneut den Status aller Container:
     ```bash
     docker compose ps
     ```
-    Alle Services (frontend, backend, database) sollten als `Up` oder `running` angezeigt werden. Der `database`-Service sollte zudem `(healthy)` im Status anzeigen (falls der Healthcheck in deiner `docker-compose.yml` für die DB aktiv ist).
+    Alle Services (`frontend_web_app`, `backend_api_service`, `postgres_db_service`) sollten laufen (`Up` oder `running`).
 
-5.  **Anwendung im Browser aufrufen:**
+6.  **Anwendung im Browser aufrufen:**
     Öffne deinen Webbrowser und gehe zu `http://localhost:8080`.
+
+## Funktionalität Testen
+
+1.  **CRUD:** Füge Notizen hinzu, bearbeite sie und lösche sie über das Frontend.
+2.  **Persistenz:**
+    *   Erstelle einige Notizen.
+    *   Stoppe den Datenbank-Container: `docker compose stop database`
+    *   Starte ihn wieder: `docker compose start database`
+    *   Lade die Anwendung im Browser neu (`http://localhost:8080`). Die Notizen sollten immer noch vorhanden sein.
 
 ## Wichtige Services und Ports
 
-*   **Frontend (Nginx):** Erreichbar unter `http://localhost:8080` (Host-Port 8080 gemappt auf Container-Port 80).
-*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder dem Wert von `BACKEND_PORT`). API-Aufrufe vom Frontend erfolgen über den Nginx-Proxy auf dem Pfad `/api`.
-*   **Datenbank (PostgreSQL):** Lauscht intern im Docker-Netzwerk auf Port 5432. Ist optional auf Host-Port `5433` gemappt (siehe `docker-compose.yml`) für direkten Zugriff mit DB-Tools.
+*   **Frontend (Nginx):** Erreichbar unter `http://localhost:8080`. Leitet API-Anfragen (`/api/*`) an das Backend weiter.
+*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder `BACKEND_PORT`). **Verbindet sich mit dem `database`-Service** für Datenoperationen.
+*   **Datenbank (PostgreSQL):** Lauscht intern auf Port 5432. Ist optional auf Host-Port `5433` gemappt für direkten Zugriff mit DB-Tools. Speichert Daten im benannten Volume `postgres_data`.
 
 ## Logs anzeigen
 
-*   Logs aller Services:
-    ```bash
-    docker compose logs
-    ```
-*   Logs eines spezifischen Services (z.B. Backend):
-    ```bash
-    docker compose logs backend
-    ```
-*   Logs eines Services live verfolgen:
-    ```bash
-    docker compose logs -f backend
-    ```
+*   Logs aller Services: `docker compose logs`
+*   Logs des Backends: `docker compose logs backend` (Zeigt DB-Verbindungsversuche, SQL-Fehler etc.)
+*   Logs des Frontends (Nginx): `docker compose logs frontend`
+*   Logs der Datenbank: `docker compose logs database`
+*   Live-Verfolgung (z.B. Backend): `docker compose logs -f backend`
 
 ## Anwendung stoppen
 
-*   Um die Container zu stoppen:
-    ```bash
-    docker compose stop
-    ```
-*   Um die Container zu stoppen und zu entfernen (Netzwerke bleiben bestehen, benannte Volumes auch):
-    ```bash
-    docker compose down
-    ```
-*   Um die Container zu stoppen, zu entfernen UND alle benannten Volumes zu löschen, die in der `docker-compose.yml` definiert sind (ACHTUNG: Datenverlust!):
-    ```bash
-    docker compose down -v
-    ```
+*   Container stoppen: `docker compose stop`
+*   Container stoppen & entfernen (Daten im DB-Volume bleiben): `docker compose down`
+*   Container stoppen, entfernen & **DB-Volume löschen** (ACHTUNG: Datenverlust!): `docker compose down -v`
 
 ## SQL Recap & Datenmodell
 
-Eine theoretische Ausarbeitung eines relationalen Datenbankmodells (Schema-Definition mit `CREATE TABLE` und CRUD-SQL-Abfragen), das thematisch zur Anwendung passt, befindet sich in der Datei `sql_schema_and_queries.md`.
+Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich in der Datei `sql_schema_and_queries.md`. Das **tatsächliche initiale Schema**, das für diese Aufgabe manuell angewendet wird, befindet sich in `backend/sql/initial_schema.sql`.
+
+## Code-Qualität und Konventionen
+
+*   **Sicherheit:** Es werden parametrisierte Abfragen verwendet, um SQL Injection zu verhindern.
+*   **Module:** Das Backend verwendet ES-Module (`import`/`export`).
+*   **.gitignore / .dockerignore:** 
 ```

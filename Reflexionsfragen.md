@@ -98,3 +98,62 @@ Der Port `5432` ist der Standardport, auf dem PostgreSQL innerhalb seines Contai
 Im Gegensatz dazu ist das `ports: - "8080:80"` für den `frontend`-Service **essenziell**, da der Benutzer über seinen Browser auf dem Host-Rechner auf Port 8080 zugreifen muss, um die Anwendung überhaupt zu erreichen.
 
 ---
+
+### Reflexionsfragen
+
+1.  **Welche Anpassungen waren im Backend-Code (spezifisch im Service Layer) notwendig, um von der File-basierten Persistenz auf die Datenbank-Persistenz umzusteigen?**
+
+    Der Service Layer musste grundlegend überarbeitet werden. Der vorherige Service (`fileService.js`), der das `node:fs`-Modul zum Lesen und Schreiben einer JSON-Datei verwendete, wurde durch einen neuen Service (`noteDbService.js`) ersetzt. Dieser neue Service importiert stattdessen einen Datenbank-Connection-Pool (`pg.Pool`). Jede Funktion (z.B. `getAllNotes`, `getNoteById`, `createNote`, `updateNoteById`, `deleteNoteById`) wurde umgeschrieben, um SQL-Abfragen mittels `pool.query()` auszuführen. Dabei wurden die Logik zur Dateimanipulation durch entsprechende SQL-Befehle (`SELECT`, `INSERT`, `UPDATE`, `DELETE`) ersetzt. Die Fehlerbehandlung wurde angepasst, um Datenbankfehler abzufangen, und die Rückgabewerte wurden modifiziert, um die Ergebnisse der Datenbankabfragen (`result.rows`) zu liefern. Es wurde auch darauf geachtet, die Spaltennamen aus der Datenbank (`text_content`) über SQL-Aliase (`AS text`) an die vom Frontend erwarteten Feldnamen anzupassen.
+
+2.  **Warum ist die Nutzung eines Connection Pools (`pg.Pool`) eine Best Practice, wenn deine API viele Datenbankabfragen verarbeiten muss, verglichen mit einer einzelnen `pg.Client`-Instanz?**
+
+    Die Nutzung eines Connection Pools (`pg.Pool`) ist eine Best Practice aus mehreren Gründen:
+    *   **Performance:** Das Herstellen einer Datenbankverbindung ist ein zeit- und ressourcenintensiver Vorgang. Ein Pool hält eine konfigurierbare Anzahl von Verbindungen offen und bereit. Wenn eine Anfrage eine DB-Operation benötigt, leiht sie sich eine bestehende Verbindung aus dem Pool, anstatt eine neue aufzubauen. Nach Abschluss der Operation wird die Verbindung an den Pool zurückgegeben und kann von der nächsten Anfrage wiederverwendet werden. Dies reduziert die Latenz erheblich.
+    *   **Ressourcenmanagement:** Datenbankserver können nur eine begrenzte Anzahl gleichzeitiger Verbindungen verwalten. Ein Pool begrenzt die maximale Anzahl der Verbindungen, die die Anwendung zur Datenbank öffnet, und verhindert so eine Überlastung des Datenbankservers.
+    *   **Effizienz:** Das ständige Öffnen und Schließen von Verbindungen (wie es bei der Verwendung einer neuen `pg.Client`-Instanz pro Anfrage passieren könnte) verbraucht unnötig CPU-Zeit und Speicher auf beiden Seiten (Anwendung und Datenbank). Ein Pool minimiert diesen Overhead.
+    *   **Robustheit:** Der Pool kann Verbindungen verwalten, fehlerhafte Verbindungen erkennen und entfernen und sicherstellen, dass Verbindungen korrekt wieder freigegeben werden.
+
+3.  **Erkläre anhand eines Beispiels aus deinem Code, wie du SQL Injection bei einer Abfrage, die Benutzereingaben verwendet (z.B. beim Abrufen eines Items nach ID oder beim Erstellen eines Items), vermieden hast. Warum ist dies wichtig?**
+
+    SQL Injection wurde durch die Verwendung von **parametrisierten Abfragen** (Prepared Statements) vermieden. Ein Beispiel ist die Funktion `createNote` im `noteDbService.js`:
+
+    ```javascript
+    const createNote = async (text) => {
+      const sql = 'INSERT INTO notes (text_content) VALUES ($1) RETURNING id, text_content AS text, created_at, updated_at';
+      const values = [text]; // Benutzereingabe im Array
+      try {
+        const result = await pool.query(sql, values); // Werte werden getrennt übergeben
+        // ...
+        return result.rows[0];
+      } catch (err) {
+        // ...
+      }
+    };
+    ```
+
+    Hier wird der vom Benutzer bereitgestellte `text` nicht direkt in den SQL-String eingefügt. Stattdessen wird im SQL-String ein Platzhalter (`$1`) verwendet. Der eigentliche Wert (`text`) wird separat in einem Array (`values`) an die `pool.query()`-Methode übergeben. Der `pg`-Datenbanktreiber sorgt dafür, dass dieser Wert sicher als Datenparameter an die Datenbank gesendet wird und *nicht* als Teil des SQL-Befehls interpretiert wird.
+
+    **Wichtigkeit:** Dies ist entscheidend, um SQL Injection zu verhindern. Wenn Benutzereingaben direkt in SQL-Strings konkateniert würden (z.B. `VALUES ('${text}')`), könnte ein Angreifer schadhaften SQL-Code einschleusen (z.B. `'); DROP TABLE notes; --`). Parametrisierte Abfragen stellen sicher, dass die Eingabe immer als Datenwert behandelt wird, wodurch solche Angriffe unmöglich werden und die Datenintegrität und Sicherheit der Anwendung gewährleistet ist.
+
+4.  **Beschreibe den manuellen Prozess, den du in dieser Aufgabe durchgeführt hast, um das initiale Datenbank-Schema zu erstellen. Welche Nachteile siehst du bei diesem manuellen Prozess, wenn sich das Schema in Zukunft ändern würde oder wenn du in einem Team arbeitest?**
+
+    Der manuelle Prozess zur Erstellung des Schemas umfasste folgende Schritte:
+    1.  Erstellen einer SQL-Datei (`backend/sql/initial_schema.sql`) mit den `CREATE TABLE`- und `CREATE TRIGGER/FUNCTION`-Befehlen.
+    2.  Starten des PostgreSQL-Datenbankcontainers über Docker Compose (`docker compose up -d database`).
+    3.  Warten, bis der Container läuft und als "healthy" gemeldet wird (`docker compose ps`).
+    4.  Ausführen des SQL-Skripts innerhalb des laufenden Containers mithilfe des `docker exec`-Befehls und des `psql`-Kommandozeilen-Clients: `docker exec -i postgres_db_service psql -U <db_user> -d <db_name> < backend/sql/initial_schema.sql`.
+
+    **Nachteile dieses manuellen Prozesses:**
+    *   **Fehleranfälligkeit:** Manuelle Schritte können leicht vergessen, in der falschen Reihenfolge oder mit Tippfehlern ausgeführt werden.
+    *   **Mangelnde Wiederholbarkeit und Konsistenz:** Es ist schwierig sicherzustellen, dass jeder Entwickler oder jede Umgebung exakt denselben Schema-Stand hat.
+    *   **Schlechte Skalierbarkeit:** Bei häufigen Schemaänderungen oder komplexeren Schemata wird der manuelle Prozess unübersichtlich und zeitaufwendig.
+    *   **Keine Versionierung des Schema-Zustands:** Obwohl die `.sql`-Datei versioniert werden kann, gibt es keine automatische Nachverfolgung, welcher Stand des Schemas aktuell in der Datenbank angewendet ist.
+    *   **Schwierige Zusammenarbeit im Team:** Jedes Teammitglied muss die Schema-Updates manuell durchführen und koordinieren, was zu Inkonsistenzen führen kann.
+    *   **Nicht für CI/CD geeignet:** Manuelle Schritte sind ein Hindernis für automatisierte Deployment-Pipelines.
+    *   **Kein einfacher Rollback-Mechanismus:** Wenn ein Schema-Update fehlschlägt oder fehlerhaft ist, gibt es keinen einfachen, standardisierten Weg, zur vorherigen Version zurückzukehren.
+
+5.  **Wie hast du in diesem Setup sichergestellt, dass die Datenbank läuft und (wahrscheinlich) bereit ist, bevor dein Backend-Service startet?**
+
+    Die Sicherstellung erfolgte auf zwei Ebenen:
+    1.  **Docker Compose `depends_on`:** In der `docker-compose.yml` wurde für den `backend`-Service eine Abhängigkeit zum `database`-Service mit der Bedingung `condition: service_healthy` definiert. Dies weist Docker Compose an, den Start des `backend`-Containers zu verzögern, bis der `database`-Container nicht nur läuft, sondern auch sein Healthcheck (definiert als `pg_isready`) erfolgreich ist. Dies gibt eine hohe Wahrscheinlichkeit, dass die Datenbank bereit ist, Verbindungen anzunehmen.
+    2.  **Aktive Verbindungskontrolle beim Serverstart:** Im `backend/server.js` wird beim Start die Funktion `testConnection` (aus `backend/src/db/index.js`) aufgerufen. Diese Funktion versucht explizit, eine Verbindung aus dem Pool zu erhalten und eine einfache Testabfrage (`SELECT NOW()`) an die Datenbank zu senden. Schlägt dieser Verbindungsversuch oder die Testabfrage fehl, wird ein Fehler geworfen, der den Start des Backend-Servers verhindert (`process.exit(1)`). Dies stellt sicher, dass das Backend nicht startet, wenn es keine funktionierende Verbindung zur Datenbank herstellen kann.
