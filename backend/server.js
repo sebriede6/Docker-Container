@@ -1,22 +1,21 @@
-const { app, initializeApp } = require('./src/app');
-const { PORT, DATA_FILE } = require('./src/config');
-const winston = require('winston');
-
+import app, { initializeApp, PORT } from './src/app.js';
+import { DATA_FILE } from './src/config/index.js';
+import winston from 'winston';
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info', 
+  level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.errors({ stack: true }), 
+    winston.format.errors({ stack: true }),
     winston.format.splat(),
-    winston.format.json() 
+    winston.format.json()
   ),
-  defaultMeta: { service: 'backend-api' }, 
+  defaultMeta: { service: 'backend-api' },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.colorize(), 
-        winston.format.simple() 
+        winston.format.colorize(),
+        winston.format.simple()
       )
     })
   ],
@@ -25,7 +24,7 @@ const logger = winston.createLogger({
 const startServer = async () => {
   try {
     logger.info('Attempting to initialize application data...');
-    await initializeApp(); 
+    await initializeApp();
     logger.info('Application data initialized successfully.');
 
     logger.info('--- Database Configuration (from ENV) ---');

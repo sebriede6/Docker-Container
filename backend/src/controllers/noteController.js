@@ -1,4 +1,4 @@
-const fileService = require('../services/fileService');
+import * as fileService from '../services/fileService.js';
 
 let notes = [];
 let nextId = 1;
@@ -20,7 +20,7 @@ const initializeNotes = async () => {
 
 const getAllNotes = (req, res) => {
   console.log('Controller: getAllNotes aufgerufen für Healthcheck oder Frontend');
-  res.status(200).json(notes); // Explizit Status 200 senden
+  res.status(200).json(notes);
 };
 
 const getNoteById = (req, res) => {
@@ -89,7 +89,7 @@ const deleteNoteById = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   initializeNotes,
   getAllNotes,
   getNoteById,

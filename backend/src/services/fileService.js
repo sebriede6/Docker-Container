@@ -1,13 +1,13 @@
-const fs = require('node:fs');
-const { DATA_DIR, DATA_FILE } = require('../config');
+import fs from 'node:fs/promises';
+import { DATA_DIR, DATA_FILE } from '../config/index.js';
 
 const ensureDataDirExists = async () => {
   try {
-    await fs.promises.access(DATA_DIR);
+    await fs.access(DATA_DIR);
   } catch (error) {
     if (error.code === 'ENOENT') {
       try {
-        await fs.promises.mkdir(DATA_DIR, { recursive: true });
+        await fs.mkdir(DATA_DIR, { recursive: true });
       } catch (mkdirError) {
         console.error(`Error creating data directory ${DATA_DIR}:`, mkdirError);
         throw mkdirError;
@@ -22,8 +22,8 @@ const ensureDataDirExists = async () => {
 const loadNotes = async () => {
   await ensureDataDirExists();
   try {
-    await fs.promises.access(DATA_FILE);
-    const fileData = await fs.promises.readFile(DATA_FILE, 'utf-8');
+    await fs.access(DATA_FILE);
+    const fileData = await fs.readFile(DATA_FILE, 'utf-8');
     return JSON.parse(fileData);
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -37,14 +37,11 @@ const loadNotes = async () => {
 const saveNotes = async (notesToSave) => {
   await ensureDataDirExists();
   try {
-    await fs.promises.writeFile(DATA_FILE, JSON.stringify(notesToSave, null, 2), 'utf-8');
+    await fs.writeFile(DATA_FILE, JSON.stringify(notesToSave, null, 2), 'utf-8');
   } catch (error) {
     console.error(`Error saving notes to ${DATA_FILE}:`, error);
     throw error;
   }
 };
 
-module.exports = {
-  loadNotes,
-  saveNotes,
-};
+export { loadNotes, saveNotes };
