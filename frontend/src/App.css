@@ -40,3 +40,22 @@
 .read-the-docs {
   color: #888;
 }
+
+.filter-button {
+  margin-left: 0.5rem; 
+  padding: 0.4rem 0.8rem; 
+ 
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+
+.filter-button.active {
+  background-color: #48bb78; 
+  color: white;
+  border-color: #38a169; 
+}
+
+
+.filter-button:not(.active):hover {
+  border-color: #718096; 
+}
