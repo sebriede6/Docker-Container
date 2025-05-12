@@ -11,11 +11,11 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 ```text
 .
 ├── .dockerignore
-├── .env                  # (LOKAL, NICHT IN GIT!)
+├── .env                  
 ├── .gitignore
-├── README.md             # Diese Datei
+├── README.md             
 ├── docker-compose.yml
-├── sql_schema_and_queries.md # Theoretisches SQL Recap
+├── sql_schema_and_queries.md 
 │
 ├── backend/
 │   ├── .dockerignore
@@ -23,22 +23,22 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 │   ├── package-lock.json
 │   ├── package.json
 │   ├── server.js
-│   ├── sql/                  # <-- NEU
-│   │   └── initial_schema.sql # <-- NEU: Manuelles Schema
+│   ├── sql/                  
+│   │   └── initial_schema.sql # 
 │   └── src/
 │       ├── app.js
 │       ├── config/
 │       │   └── index.js
 │       ├── controllers/
 │       │   └── noteController.js
-│       ├── db/                 # <-- NEU
-│       │   └── index.js        # <-- NEU: DB-Verbindung (Pool)
+│       ├── db/                 
+│       │   └── index.js        
 │       ├── routes/
 │       │   └── noteRoutes.js
 │       ├── services/
-│       │   └── noteDbService.js # <-- NEU: Ersetzt fileService
-│       └── utils/              # <-- NEU
-│           └── logger.js       # <-- NEU: Wiederverwendbarer Logger
+│       │   └── noteDbService.js 
+│       └── utils/              
+│           └── logger.js       
 │
 └── frontend/
     ├── .dockerignore
