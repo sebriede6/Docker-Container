@@ -58,7 +58,6 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
         └── components/
             ├── NoteForm.jsx
             ├── NoteItem.jsx
-            ├── NoteItem.css    # <-- NEU (falls du CSS-Klassen verwendest)
             └── NoteList.jsx
 ```
 
