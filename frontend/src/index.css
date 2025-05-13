@@ -1,26 +1,65 @@
-
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+html.light {
+  --bg-color: #ffffff;
+  --text-color: #213547;
+  --text-color-subtle: #334155;
+  --link-color: #3b82f6;
+  --link-hover-color: #2563eb;
+  --button-bg: #f1f5f9;
+  --button-text: #213547;
+  --button-hover-border: #3b82f6;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #213547;
+  --note-item-bg: #f8fafc;
+  --note-item-border: #e2e8f0;
+  --note-item-text-completed: #94a3b8;
+  --note-item-edit-input-bg: #ffffff;
+  --note-item-edit-input-text: #213547;
+  --note-item-edit-input-border: #cbd5e1;
+  --filter-button-active-bg: #22c55e;
+  --filter-button-active-text: white;
+  --filter-button-active-border: #16a34a;
+  --filter-button-hover-border: #64748b;
+  --logo-shadow-color: #646cffaa;
+  --logo-react-shadow-color: #61dafbaa;
+  --toastify-color-progress-light: var(--link-color);
 }
-a:hover {
-  color: #535bf2;
+
+html.dark {
+  --bg-color: #1e293b;
+  --text-color: #e2e8f0;
+  --text-color-subtle: #94a3b8;
+  --link-color: #60a5fa;
+  --link-hover-color: #93c5fd;
+  --button-bg: #334155;
+  --button-text: #e2e8f0;
+  --button-hover-border: #60a5fa;
+  --input-bg: #334155;
+  --input-border: #475569;
+  --input-text: #e2e8f0;
+  --note-item-bg: #334155;
+  --note-item-border: #475569;
+  --note-item-text-completed: #ef4444;
+  --note-item-edit-input-bg: #475569;
+  --note-item-edit-input-text: #e2e8f0;
+  --note-item-edit-input-border: #64748b;
+  --filter-button-active-bg: #16a34a;
+  --filter-button-active-text: white;
+  --filter-button-active-border: #15803d;
+  --filter-button-hover-border: #94a3b8;
+  --logo-shadow-color: #646cffaa;
+  --logo-react-shadow-color: #61dafbaa;
+  --toastify-color-progress-dark: var(--link-color);
 }
 
 body {
@@ -29,6 +68,18 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  font-weight: 500;
+  color: var(--link-color);
+  text-decoration: inherit;
+}
+a:hover {
+  color: var(--link-hover-color);
 }
 
 h1 {
@@ -43,46 +94,41 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-bg);
+  color: var(--button-text);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background-color 0.25s, color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--button-hover-border);
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+input.themed-input, select.themed-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+}
+input.themed-input::placeholder {
+  color: var(--text-color-subtle);
 }
 
 .filter-button {
-  margin-left: 0.5rem; 
-  padding: 0.4rem 0.8rem; 
- 
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-
 .filter-button.active {
-  background-color: #48bb78; 
-  color: white;
-  border-color: #38a169; 
+  background-color: var(--filter-button-active-bg);
+  color: var(--filter-button-active-text);
+  border-color: var(--filter-button-active-border);
 }
 
-
 .filter-button:not(.active):hover {
-  border-color: #718096; 
+  border-color: var(--filter-button-hover-border);
 }

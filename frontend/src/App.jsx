@@ -1,6 +1,10 @@
+// frontend/src/App.jsx
+
 import React, { useState, useEffect } from 'react';
 import NoteForm from './components/NoteForm';
 import NoteList from './components/NoteList';
+import ThemeSwitcher from './components/ThemeSwitcher'; // Für den Dark/Light Mode Schalter
+import FlyingNote from './components/FlyingNote';     // Für den animierten Notizeffekt
 import { getNotes, addNote, updateNote, deleteNote, toggleNoteCompleted } from './apiClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,6 +16,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
+  const [flyingNoteData, setFlyingNoteData] = useState(null); // {id: number, text: string}
 
   useEffect(() => {
     setLoading(true);
@@ -32,8 +37,10 @@ function App() {
   const handleAddNote = (noteText) => {
     addNote(noteText)
       .then((response) => {
-        setNotes((prevNotes) => [...prevNotes, response.data]);
+        const newNote = response.data;
+        setNotes((prevNotes) => [...prevNotes, newNote]);
         toast.success("Notiz hinzugefügt!");
+        setFlyingNoteData({ id: Date.now(), text: newNote.text }); // Trigger flying note
       })
       .catch((err) => {
         console.error('Fehler beim Hinzufügen:', err);
@@ -44,10 +51,12 @@ function App() {
   const handleUpdateNote = (idToUpdate, newText) => {
     updateNote(idToUpdate, newText)
       .then((response) => {
+        const updatedNote = response.data;
         setNotes((prevNotes) =>
-          prevNotes.map((note) => (note.id === idToUpdate ? response.data : note))
+          prevNotes.map((note) => (note.id === idToUpdate ? updatedNote : note))
         );
         toast.info("Notiz aktualisiert!");
+        setFlyingNoteData({ id: Date.now(), text: updatedNote.text }); // Trigger flying note
       })
       .catch((err) => {
         console.error('Fehler beim Aktualisieren:', err);
@@ -80,6 +89,10 @@ function App() {
       });
   };
 
+  const handleFlyingNoteAnimationComplete = () => {
+    setFlyingNoteData(null); // Reset, damit bei nächstem Speichern neu getriggert wird
+  };
+
   const processedNotes = notes
     .filter(note =>
       note.text.toLowerCase().includes(searchTerm.toLowerCase())
@@ -105,6 +118,7 @@ function App() {
 
   return (
     <div className="App">
+      <ThemeSwitcher />
       <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -115,8 +129,17 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="colored"
+          theme="colored" // Du könntest hier auch das Theme dynamisch anpassen: theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
       />
+
+      {flyingNoteData && (
+        <FlyingNote
+          key={flyingNoteData.id}
+          text={flyingNoteData.text}
+          onAnimationComplete={handleFlyingNoteAnimationComplete}
+        />
+      )}
+
       <h1>Mini Notizblock</h1>
       <NoteForm onAddNote={handleAddNote} />
       <div style={{ margin: '1rem 0' }}>
@@ -126,12 +149,12 @@ function App() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ padding: '0.5rem', minWidth: '300px', marginRight: '1rem' }}
+          className="themed-input"
         />
       </div>
-      <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div>
+      <div style={{ margin: '1rem 0', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div>
           <span>Filtern: </span>
-          {/* Füge 'filter-button' als Basisklasse und 'active' hinzu, wenn der Status übereinstimmt */}
           <button
             className={`filter-button ${filterStatus === 'all' ? 'active' : ''}`}
             onClick={() => setFilterStatus('all')}
@@ -153,7 +176,7 @@ function App() {
         </div>
         <div>
           <span>Sortieren: </span>
-          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} style={{ padding: '0.4rem' }}>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} style={{ padding: '0.4rem' }} className="themed-select">
             <option value="newest">Neueste zuerst</option>
             <option value="oldest">Älteste zuerst</option>
             <option value="az">A-Z</option>

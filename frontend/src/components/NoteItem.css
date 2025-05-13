@@ -1,42 +1,45 @@
 .note-item {
-  background-color: #3a3a3a; 
-  color: rgba(255, 255, 255, 0.87);
-  border: 1px solid #555;
+  background-color: var(--note-item-bg);
+  color: var(--text-color);
+  border: 1px solid var(--note-item-border);
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
-  display: flex; 
-  align-items: center; 
-  gap: 0.75rem; 
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   border-radius: 4px;
-  word-break: break-word; 
+  word-break: break-word;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .note-item-text {
-   flex-grow: 1; 
-  
-   transition: color 0.3s ease, text-decoration 0.3s ease;
+  flex-grow: 1;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .note-item-text.completed {
   text-decoration: line-through;
-  color: #f70606; 
-  font-style: italic; 
+  color: var(--note-item-text-completed);
+  font-style: italic;
 }
 
 .note-item-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-shrink: 0; 
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .note-item-edit-input {
-   flex-grow: 1;
-   margin-right: 1rem; 
-   padding: 0.4rem 0.6rem;
-   border: 1px solid #ccc;
-   border-radius: 4px;
-   background-color: #fff;
-   color: #213547;
+  flex-grow: 1;
+  margin-right: 1rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--note-item-edit-input-border);
+  border-radius: 4px;
+  background-color: var(--note-item-edit-input-bg);
+  color: var(--note-item-edit-input-text);
+}
+.note-item-edit-input::placeholder {
+  color: var(--text-color-subtle);
 }
 
 .note-item-button {
@@ -45,24 +48,13 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9em;
-  color: #ffffff;
 }
 
-.note-item-button.edit { background-color: #4a5568; }
-.note-item-button.delete { background-color: #e53e3e; }
-.note-item-button.save { background-color: #48bb78; }
-.note-item-button.cancel { background-color: #718096; }
+.note-item-button.edit { background-color: #4a5568; color: white; }
+.note-item-button.delete { background-color: #e53e3e; color: white; }
+.note-item-button.save { background-color: #48bb78; color: white; }
+.note-item-button.cancel { background-color: #718096; color: white; }
 
-/* Anpassungen für Light Mode */
-@media (prefers-color-scheme: light) {
-  .note-item {
-    background-color: #f7fafc;
-    color: #2d3748;
-    border: 1px solid #e2e8f0;
-  }
-
-  .note-item-text.completed {
-     color: #a0aec0; 
-  }
-
+.note-item-button:hover {
+  opacity: 0.8;
 }
