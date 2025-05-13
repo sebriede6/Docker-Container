@@ -1,76 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400&display=swap');
-
 .flying-note-container {
   position: fixed;
   z-index: 1000;
-  width: 120px;
-  height: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-.note-paper-visual {
-  background-color: #ffffe0;
-  padding: 15px 10px 10px 10px;
-  border: 1px solid #f5f5dc;
-  box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
-  width: 100%;
-  height: 100%;
+.note-paper {
+  background-color: #fffacd;
+  padding: 10px;
+  border: 1px solid #f0e68c;
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+  width: 100px;
+  height: 100px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   text-align: center;
-  font-family: 'Kalam', cursive;
-  font-size: 0.9em;
-  color: #4a4a4a;
+  font-size: 0.8em;
   overflow: hidden;
   position: relative;
-  border-radius: 3px;
-  transform: rotate(-2deg);
 }
 
-.note-paper-visual::before {
-  content: '';
+.note-paper p {
+  margin: 0;
+  color: #555;
+  word-break: break-word;
+}
+
+.pin {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  border-width: 0 0 20px 20px;
-  border-style: solid;
-  border-color: transparent transparent #f0e68c transparent;
-  box-shadow: -1px -1px 2px rgba(0,0,0,0.1);
-  transition: border-width 0.2s ease-in-out;
-}
-
-.note-text-preview {
-  margin-top: 10px;
-  line-height: 1.3;
-  max-height: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.pin-area {
-  position: absolute;
-  top: 5px;
+  top: -5px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1;
+  width: 12px;
+  height: 12px;
+  background-color: #d3d3d3;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid #a9a9a9;
 }
 
-.pin-svg {
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+.pin::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 5px;
+  background-color: #808080;
 }
-
-.pin-svg path:first-child {
-}
-
-.pin-svg path:last-child {
-}
+.note-paper::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background-color: #fffacd;
+  border-radius: 50%;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+} 
