@@ -1,4 +1,3 @@
-// frontend/src/components/ThemeSwitcher.jsx
 import React, { useEffect, useState } from 'react';
 import './ThemeSwitcher.css';
 

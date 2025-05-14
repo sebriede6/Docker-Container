@@ -1,7 +1,7 @@
 import React from 'react';
 import NoteItem from './NoteItem';
 
-function NoteList({ notes, onDeleteNote, onUpdateNote, onToggleComplete }) { // onToggleComplete als Prop empfangen
+function NoteList({ notes, onDeleteNote, onUpdateNote, onToggleComplete }) { 
   if (!Array.isArray(notes)) {
     console.warn("NoteList erhielt 'notes' nicht als Array:", notes);
     return <p>Notizdaten sind nicht im korrekten Format.</p>;
@@ -15,7 +15,7 @@ function NoteList({ notes, onDeleteNote, onUpdateNote, onToggleComplete }) { // 
           note={note}
           onDelete={onDeleteNote}
           onUpdate={onUpdateNote}
-          onToggle={onToggleComplete} // Handler an NoteItem weitergeben
+          onToggle={onToggleComplete} 
         />
       ))}
     </ul>

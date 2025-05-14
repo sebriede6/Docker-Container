@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './NoteItem.css'; 
 
-function NoteItem({ note, onDelete, onUpdate, onToggle }) { // onToggle als Prop empfangen
+function NoteItem({ note, onDelete, onUpdate, onToggle }) { 
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(note.text);
 
@@ -18,7 +18,7 @@ function NoteItem({ note, onDelete, onUpdate, onToggle }) { // onToggle als Prop
   };
 
   const handleCheckboxChange = () => {
-    onToggle(note.id); // Rufe den Handler aus App.jsx auf
+    onToggle(note.id); 
   };
 
   const textClassName = `note-item-text ${note.completed ? 'completed' : ''}`;
@@ -55,7 +55,7 @@ function NoteItem({ note, onDelete, onUpdate, onToggle }) { // onToggle als Prop
             type="checkbox"
             checked={note.completed}
             onChange={handleCheckboxChange}
-            style={{ marginRight: '0.75rem', cursor: 'pointer' }} // Style für die Checkbox
+            style={{ marginRight: '0.75rem', cursor: 'pointer' }} 
           />
           <span className={textClassName}>{note.text}</span>
            <div className="note-item-actions">

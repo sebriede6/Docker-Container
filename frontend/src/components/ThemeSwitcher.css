@@ -1,5 +1,3 @@
-/* frontend/src/components/ThemeSwitcher.css */
-
 .theme-switcher-container {
   position: absolute;
   top: 1.2rem;
@@ -27,22 +25,22 @@
 .theme-switcher-slider {
   position: relative;
   display: inline-block;
-  width: 44px; /* Etwas breiter für Icons */
-  height: 22px; /* Etwas höher für Icons */
+  width: 44px;
+  height: 22px;
   background-color: var(--button-bg);
   border-radius: 22px;
   transition: background-color 0.3s ease;
-  display: flex; /* Um Icons besser zu positionieren */
-  align-items: center; /* Vertikal zentrieren */
-  justify-content: space-between; /* Icons an die Enden */
-  padding: 0 4px; /* Kleiner Innenabstand für die Icons */
-  box-sizing: border-box; /* Wichtig, damit Padding die Breite nicht erhöht */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 
-.theme-switcher-slider::before { /* Der bewegliche Knopf */
+.theme-switcher-slider::before {
   content: "";
   position: absolute;
-  width: 18px; /* Größe des Knopfes anpassen */
+  width: 18px;
   height: 18px;
   border-radius: 50%;
   background-color: white;
@@ -50,36 +48,33 @@
   left: 2px;
   transition: transform 0.3s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  z-index: 1; /* Sicherstellen, dass der Knopf über den Icons ist */
+  z-index: 1;
 }
 
-/* Container für die Icons */
 .theme-switcher-slider .icon {
-  font-size: 0.8em; /* Größe der Icons */
-  line-height: 1; /* Verhindert zusätzliche Höhe durch line-height */
-  color: var(--text-color); /* Farbe der Icons anpassen */
+  font-size: 0.8em;
+  line-height: 1;
+  color: var(--text-color);
   transition: opacity 0.3s ease;
-  z-index: 0; /* Hinter dem beweglichen Knopf */
+  z-index: 0;
 }
 
 .theme-switcher-slider .sun-icon {
-  opacity: 1; /* Standardmäßig sichtbar (Light Mode) */
+  opacity: 1;
 }
 
 .theme-switcher-slider .moon-icon {
-  opacity: 0; /* Standardmäßig unsichtbar */
+  opacity: 0;
 }
-
 
 .theme-switcher-checkbox:checked + .theme-switcher-slider {
   background-color: var(--filter-button-active-bg);
 }
 
 .theme-switcher-checkbox:checked + .theme-switcher-slider::before {
-  transform: translateX(22px); /* Bewegung des Knopfes anpassen */
+  transform: translateX(22px);
 }
 
-/* Icon-Sichtbarkeit beim Umschalten */
 .theme-switcher-checkbox:checked + .theme-switcher-slider .sun-icon {
   opacity: 0;
 }
@@ -87,7 +82,6 @@
 .theme-switcher-checkbox:checked + .theme-switcher-slider .moon-icon {
   opacity: 1;
 }
-
 
 .theme-switcher-text {
   user-select: none;
