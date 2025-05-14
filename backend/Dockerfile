@@ -1,6 +1,7 @@
 FROM node:lts-alpine
 
-RUN apk add --no-cache wget ca-certificates
+
+RUN apk add --no-cache curl
 
 WORKDIR /app
 

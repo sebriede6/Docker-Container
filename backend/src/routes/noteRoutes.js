@@ -5,7 +5,7 @@ import {
     createNote,
     updateNoteById,
     deleteNoteById,
-    toggleNoteCompleted // Importiere die neue Funktion
+    toggleNoteCompleted 
  } from '../controllers/noteController.js';
 
 const router = express.Router();
@@ -15,6 +15,6 @@ router.post('/', createNote);
 router.get('/:id', getNoteById);
 router.put('/:id', updateNoteById);
 router.delete('/:id', deleteNoteById);
-router.patch('/:id/toggle', toggleNoteCompleted); // Neue PATCH Route
+router.patch('/:id/toggle', toggleNoteCompleted); 
 
 export default router;

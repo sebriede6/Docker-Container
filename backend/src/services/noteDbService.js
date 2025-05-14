@@ -90,5 +90,5 @@ export {
   createNote,
   updateNoteById,
   deleteNoteById,
-  toggleNoteCompletedById // Neue Funktion exportieren
+  toggleNoteCompletedById 
 };
