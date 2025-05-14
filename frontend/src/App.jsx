@@ -1,10 +1,8 @@
-// frontend/src/App.jsx
-
 import React, { useState, useEffect } from 'react';
 import NoteForm from './components/NoteForm';
 import NoteList from './components/NoteList';
-import ThemeSwitcher from './components/ThemeSwitcher'; // Für den Dark/Light Mode Schalter
-import FlyingNote from './components/FlyingNote';     // Für den animierten Notizeffekt
+import ThemeSwitcher from './components/ThemeSwitcher';
+import FlyingNote from './components/FlyingNote';
 import { getNotes, addNote, updateNote, deleteNote, toggleNoteCompleted } from './apiClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +14,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
-  const [flyingNoteData, setFlyingNoteData] = useState(null); // {id: number, text: string}
+  const [flyingNoteData, setFlyingNoteData] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -34,13 +32,13 @@ function App() {
       });
   }, []);
 
-  const handleAddNote = (noteText) => {
+  const handleAddNote = (noteText, startPos) => {
     addNote(noteText)
       .then((response) => {
         const newNote = response.data;
         setNotes((prevNotes) => [...prevNotes, newNote]);
         toast.success("Notiz hinzugefügt!");
-        setFlyingNoteData({ id: Date.now(), text: newNote.text }); // Trigger flying note
+        setFlyingNoteData({ id: Date.now(), text: newNote.text, startPos: startPos });
       })
       .catch((err) => {
         console.error('Fehler beim Hinzufügen:', err);
@@ -56,7 +54,7 @@ function App() {
           prevNotes.map((note) => (note.id === idToUpdate ? updatedNote : note))
         );
         toast.info("Notiz aktualisiert!");
-        setFlyingNoteData({ id: Date.now(), text: updatedNote.text }); // Trigger flying note
+        setFlyingNoteData({ id: Date.now(), text: updatedNote.text, startPos: null });
       })
       .catch((err) => {
         console.error('Fehler beim Aktualisieren:', err);
@@ -90,7 +88,7 @@ function App() {
   };
 
   const handleFlyingNoteAnimationComplete = () => {
-    setFlyingNoteData(null); // Reset, damit bei nächstem Speichern neu getriggert wird
+    setFlyingNoteData(null);
   };
 
   const processedNotes = notes
@@ -129,13 +127,14 @@ function App() {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="colored" // Du könntest hier auch das Theme dynamisch anpassen: theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+          theme="colored"
       />
 
       {flyingNoteData && (
         <FlyingNote
           key={flyingNoteData.id}
           text={flyingNoteData.text}
+          startPosition={flyingNoteData.startPos}
           onAnimationComplete={handleFlyingNoteAnimationComplete}
         />
       )}

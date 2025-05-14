@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import './FlyingNote.css'; 
+import './FlyingNote.css';
 
-const FlyingNote = ({ text, onAnimationComplete }) => {
+const FlyingNote = ({ text, startPosition, onAnimationComplete }) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
@@ -12,15 +11,18 @@ const FlyingNote = ({ text, onAnimationComplete }) => {
       if (onAnimationComplete) {
         onAnimationComplete();
       }
-    }, 4000); 
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, [onAnimationComplete]);
 
-  
   const targetX = Math.random() * (window.innerWidth / 2) - (window.innerWidth / 4) + 'px';
-  const targetY = Math.random() * 100 + 50 + 'px'; 
-  const rotation = Math.random() * 30 - 15; 
+  const targetY = Math.random() * 100 + 50 + 'px';
+  const rotation = Math.random() * 30 - 15;
+
+  const initialX = startPosition ? startPosition.x - 50 : window.innerWidth / 2 - 50;
+  const initialY = startPosition ? startPosition.y - 50 : window.innerHeight / 2 - 50;
+
 
   if (!isVisible) return null;
 
@@ -29,14 +31,20 @@ const FlyingNote = ({ text, onAnimationComplete }) => {
       {isVisible && (
         <motion.div
           className="flying-note-container"
-          initial={{ opacity: 0, y: 0, x: 0, scale: 0.5 }}
+          initial={{
+            opacity: 0,
+            x: initialX,
+            y: initialY,
+            scale: 0.3,
+            rotate: Math.random() * 60 - 30,
+          }}
           animate={{
             opacity: 1,
             y: targetY,
             x: targetX,
             scale: 1,
             rotate: rotation,
-            transition: { type: 'spring', stiffness: 50, damping: 10, duration: 1.5 },
+            transition: { type: 'spring', stiffness: 50, damping: 12, duration: 1.5 },
           }}
           exit={{
             opacity: 0,
