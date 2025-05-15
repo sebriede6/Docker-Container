@@ -14,9 +14,9 @@ const getAllNotes = async (req, res, next) => {
 
 const getNoteById = async (req, res, next) => {
   const noteId = parseInt(req.params.id, 10);
-   if (isNaN(noteId)) {
-     logger.warn('Controller: Ungültige ID in getNoteById angefordert', { paramId: req.params.id });
-     return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+  if (isNaN(noteId)) {
+    logger.warn('Controller: Ungültige ID in getNoteById angefordert', { paramId: req.params.id });
+    return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
   }
   logger.debug(`Controller: getNoteById aufgerufen für ID: ${noteId}`);
   try {
@@ -38,8 +38,12 @@ const createNote = async (req, res, next) => {
   const { text } = req.body;
 
   if (typeof text !== 'string' || text.trim() === '') {
-    logger.warn('Controller: Ungültiger Text in createNote', { body: req.body });
-    return res.status(400).json({ message: 'Text für Notiz fehlt oder ist ungültig' });
+    logger.warn('Controller: Ungültiger Text in createNote - Text fehlt oder ist leer', { body: req.body });
+    return res.status(400).json({ message: 'Text für Notiz fehlt oder ist ungültig.' });
+  }
+  if (text.length > 1000) { // Beispiel: Maximale Länge
+    logger.warn('Controller: Ungültiger Text in createNote - Text zu lang', { textLength: text.length });
+    return res.status(400).json({ message: 'Text für Notiz darf maximal 1000 Zeichen lang sein.' });
   }
 
   try {
@@ -60,8 +64,12 @@ const updateNoteById = async (req, res, next) => {
     return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
   }
   if (typeof text !== 'string' || text.trim() === '') {
-    logger.warn('Controller: Ungültiger Text in updateNoteById', { body: req.body, id: noteId });
-    return res.status(400).json({ message: 'Neuer Text für Notiz fehlt oder ist ungültig' });
+    logger.warn('Controller: Ungültiger Text in updateNoteById - Text fehlt oder ist leer', { body: req.body, id: noteId });
+    return res.status(400).json({ message: 'Neuer Text für Notiz fehlt oder ist ungültig.' });
+  }
+  if (text.length > 1000) { // Beispiel: Maximale Länge
+    logger.warn('Controller: Ungültiger Text in updateNoteById - Text zu lang', { id: noteId, textLength: text.length });
+    return res.status(400).json({ message: 'Text für Notiz darf maximal 1000 Zeichen lang sein.' });
   }
 
   logger.debug(`Controller: updateNoteById aufgerufen für ID: ${noteId} mit Body:`, req.body);
@@ -70,12 +78,12 @@ const updateNoteById = async (req, res, next) => {
     if (updatedNote) {
       res.status(200).json(updatedNote);
     } else {
-       logger.warn(`Controller: Notiz nicht gefunden für Update ID: ${noteId}`);
-       res.status(404).json({ message: 'Notiz nicht gefunden' });
+      logger.warn(`Controller: Notiz nicht gefunden für Update ID: ${noteId}`);
+      res.status(404).json({ message: 'Notiz nicht gefunden' });
     }
-  } catch(error) {
-      logger.error(`Controller: Fehler in updateNoteById für ID: ${noteId}`, { error: error.message });
-      next(error);
+  } catch (error) {
+    logger.error(`Controller: Fehler in updateNoteById für ID: ${noteId}`, { error: error.message });
+    next(error);
   }
 };
 
@@ -103,26 +111,26 @@ const deleteNoteById = async (req, res, next) => {
 };
 
 const toggleNoteCompleted = async (req, res, next) => {
-    const noteId = parseInt(req.params.id, 10);
+  const noteId = parseInt(req.params.id, 10);
 
-    if (isNaN(noteId)) {
-        logger.warn('Controller: Ungültige ID in toggleNoteCompleted angefordert', { paramId: req.params.id });
-        return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
-    }
+  if (isNaN(noteId)) {
+    logger.warn('Controller: Ungültige ID in toggleNoteCompleted angefordert', { paramId: req.params.id });
+    return res.status(400).json({ message: 'Ungültige Notiz-ID angegeben.' });
+  }
 
-    logger.debug(`Controller: toggleNoteCompleted aufgerufen für ID: ${noteId}`);
-    try {
-        const updatedNote = await noteDbService.toggleNoteCompletedById(noteId);
-        if (updatedNote) {
-            res.status(200).json(updatedNote);
-        } else {
-            logger.warn(`Controller: Notiz nicht gefunden für Toggle ID: ${noteId}`);
-            res.status(404).json({ message: 'Notiz nicht gefunden' });
-        }
-    } catch (error) {
-        logger.error(`Controller: Fehler in toggleNoteCompleted für ID: ${noteId}`, { error: error.message });
-        next(error);
+  logger.debug(`Controller: toggleNoteCompleted aufgerufen für ID: ${noteId}`);
+  try {
+    const updatedNote = await noteDbService.toggleNoteCompletedById(noteId);
+    if (updatedNote) {
+      res.status(200).json(updatedNote);
+    } else {
+      logger.warn(`Controller: Notiz nicht gefunden für Toggle ID: ${noteId}`);
+      res.status(404).json({ message: 'Notiz nicht gefunden' });
     }
+  } catch (error) {
+    logger.error(`Controller: Fehler in toggleNoteCompleted für ID: ${noteId}`, { error: error.message });
+    next(error);
+  }
 };
 
 export {

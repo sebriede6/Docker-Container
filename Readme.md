@@ -5,7 +5,7 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 *   Ein Frontend, das mit Vite gebaut und von Nginx als Webserver und Reverse Proxy ausgeliefert wird.
 *   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer **PostgreSQL-Datenbank** speichert.
 *   Eine PostgreSQL-Datenbank als dedizierter Service.
-*   Integrierte Healthchecks für Datenbank und Backend zur Sicherstellung der Diensteverfügbarkeit.
+*   Integrierte Healthchecks für Datenbank und Backend zur Sicherstellung der Diensteverfügbarkeit und Robustheit der Anwendung.
 
 ## Projektstruktur
 
@@ -70,11 +70,11 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 
 ## Screenshots
 
-**Aktuelle Screenshots (mit Datenbank-Persistenz und funktionierenden CRUD-Operationen):**
+**Aktuelle Screenshots (healthy, unhealthy):**
 
 *   Funktionierende Anwendung im Browser (CRUD):
     [![Anwendung läuft](assets)](assets)
-
+    
 
 
 ## Features
@@ -86,12 +86,13 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 *   Status von Notizen umschalten (Erledigt/Offen)
 *   Backend-Datenpersistenz mittels **PostgreSQL-Datenbank** (über Docker Volume).
 *   Datenbankverbindung mit `pg` Treiber und **Connection Pooling**.
-*   **Sichere API** durch parametrisierte SQL-Abfragen (Schutz vor SQL Injection).
+*   **Sichere API** durch parametrisierte SQL-Abfragen (Schutz vor SQL Injection) und grundlegende Eingabevalidierung im Backend.
 *   Vollständig containerisiert mit Docker: Frontend, Backend, Datenbank.
 *   Orchestrierung mit Docker Compose.
 *   Frontend mit Nginx Reverse Proxy für API-Aufrufe an das Backend.
-*   Logging wichtiger Ereignisse und DB-Verbindungsstatus.
-*   **Aussagekräftige Healthchecks** für Datenbank- und Backend-Dienst, konfiguriert in `docker-compose.yml`.
+*   **Robuste Fehlerbehandlung**: Das Backend stürzt bei DB-Verbindungsproblemen nicht ab und gibt sinnvolle Fehlercodes zurück. Das Frontend zeigt bei Backend-Fehlern nutzerfreundliche Meldungen an.
+*   Umfassendes Logging wichtiger Ereignisse, DB-Verbindungsstatus und Fehler.
+*   **Aussagekräftige Healthchecks** für Datenbank- und Backend-Dienst, die die tatsächliche Funktionsfähigkeit (inkl. DB-Verbindung für das Backend) prüfen.
 *   Manueller Light/Dark-Mode Umschalter mit Persistenz im `localStorage`.
 *   Visueller Effekt "Fliegender Notizzettel" beim Speichern von Notizen.
 *   Client-seitige Such-, Filter- und Sortierfunktionen für Notizen.
@@ -107,21 +108,19 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 1.  **Repository klonen:**
     ```bash
     git clone https://github.com/sebriede6/Docker-Container.git
-    cd <projekt-name>
+    cd Docker-Container # Oder der Name deines Projektordners
     ```
-2.  **(Optional, aber empfohlen) Umgebungsvariablen konfigurieren:**
+2.  **(Empfohlen) Umgebungsvariablen konfigurieren:**
     Erstelle eine Datei namens `.env` im Wurzelverzeichnis des Projekts (auf derselben Ebene wie `docker-compose.yml`).
     ```env
-    # .env (Beispielinhalt)
-    DB_USER=selbst ausdenken
-    DB_PASSWORD=selbst ausdenken
-    DB_NAME=selbst ausdenken
-    BACKEND_PORT=selbst ausdenken
+    # .env (Beispielinhalt - passe dies an deine Bedürfnisse an)
+    DB_USER=jo
+    DB_PASSWORD=jo
+    DB_NAME=jo
+    BACKEND_PORT=3000
     LOG_LEVEL=debug
-
-    dann natürlich die datenbank darauf zuschneiden.
     ```
-    **Wichtig:** Die `.env`-Datei ist in `.gitignore` aufgeführt, um sensible Daten zu schützen.
+    **Wichtig:** Die `.env`-Datei ist in `.gitignore` aufgeführt, um sensible Daten zu schützen. Ohne gesetztes `DB_PASSWORD` in der `.env` Datei wird die Datenbankverbindung fehlschlagen.
 
 3.  **Datenbank-Schema manuell erstellen (Einmalig):**
     *   **a) Nur Datenbank starten:**
@@ -147,50 +146,84 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
     *   `--build`: Baut die Images bei Code-Änderungen neu.
     *   `-d`: Startet die Container im Hintergrund.
 
-## Finaler Zustand des Stacks und Verifizierung
+## Finaler, robuster Zustand des Stacks und umgesetzte Stabilitätsmaßnahmen
 
-Der finale Zustand des Stacks umfasst ein voll funktionsfähiges Full-Stack-System, bestehend aus einem React-Frontend, einem Node.js/Express-Backend und einer PostgreSQL-Datenbank, alles orchestriert durch Docker Compose. Alle Dienste sind containerisiert.
+Der aktuelle Stack stellt eine robuste Full-Stack-Anwendung dar, die für einen stabileren Betrieb, auch unter widrigen Umständen, ausgelegt ist. Die wichtigsten Stabilitätsmaßnahmen umfassen:
 
-*   **Datenbank-Persistenz:** Das Backend speichert alle Notizdaten persistent in der PostgreSQL-Datenbank. Die Daten bleiben auch nach einem Neustart der Container (oder des gesamten Stacks, sofern das Datenbank-Volume nicht explizit gelöscht wird) erhalten.
-*   **CRUD-Operationen:** Alle vier CRUD-Operationen (Create, Read, Update, Delete) sowie das Umschalten des "completed"-Status für Notizen sind vollständig implementiert und funktionieren Ende-zu-Ende vom Frontend über das Backend bis zur Datenbank.
-*   **Healthchecks:**
-    *   Der **PostgreSQL-Dienst** (`database`) verfügt über einen Healthcheck, der mittels `pg_isready` prüft, ob der Datenbankserver bereit ist, Verbindungen anzunehmen.
-    *   Der **Backend-Dienst** (`backend`) hat einen Healthcheck, der über `curl` einen speziellen `/health`-Endpunkt aufruft. Dieser Endpunkt prüft intern zusätzlich die Konnektivität zur Datenbank, bevor er einen Erfolgsstatus zurückmeldet.
-    *   Die `docker-compose.yml` nutzt `depends_on` mit der `service_healthy`-Bedingung, um sicherzustellen, dass das Backend erst startet, wenn die Datenbank als "healthy" gemeldet wird, und das Frontend erst, wenn das Backend "healthy" ist.
+*   **Persistente Datenspeicherung:** Alle Notizdaten werden zuverlässig in der PostgreSQL-Datenbank gespeichert und bleiben über Neustarts der Anwendung hinweg erhalten (solange das Docker Volume `postgres_data` nicht gelöscht wird).
+*   **Vollständige CRUD-Funktionalität:** Alle Kernoperationen zum Erstellen, Lesen, Aktualisieren und Löschen von Notizen sind implementiert und funktionieren Ende-zu-Ende.
+*   **Robuste Fehlerbehandlung im Backend:**
+    *   Das Backend fängt Fehler bei Datenbankoperationen ab und stürzt nicht ab. Stattdessen werden über einen zentralen Fehlerhandler HTTP-Statuscodes (z.B. 500) an den Client gesendet.
+    *   Grundlegende Eingabevalidierung (z.B. für leere Notiztexte) ist implementiert und führt zu HTTP 400-Fehlern mit entsprechenden Meldungen.
+*   **Fehlertolerantes Frontend:**
+    *   Das React-Frontend fängt Fehler, die vom Backend kommen (z.B. 500, 503, 400), in seinen API-Aufrufen ab.
+    *   Anstatt abzustürzen oder eine leere Seite anzuzeigen, werden dem Benutzer über `react-toastify` verständliche Fehlermeldungen angezeigt (z.B. "Notizen konnten nicht geladen werden. Bitte versuchen Sie es später erneut.").
+*   **Aussagekräftige Healthchecks:**
+    *   Der **PostgreSQL-Dienst** nutzt `pg_isready`, um seine Bereitschaft zur Annahme von Verbindungen zu signalisieren.
+    *   Der **Backend-Dienst** hat einen `/health`-Endpunkt, der nicht nur die Lauffähigkeit des Node.js-Prozesses prüft, sondern auch aktiv eine Testverbindung/-abfrage zur Datenbank herstellt. Nur wenn beides erfolgreich ist, meldet der Dienst `healthy`. Dies stellt sicher, dass das Backend wirklich funktionsfähig ist.
+    *   Die `docker-compose.yml` nutzt `depends_on` mit der `service_healthy`-Bedingung, um eine korrekte Startreihenfolge der voneinander abhängigen Dienste zu gewährleisten.
+*   **Umfassendes Logging:** Wichtige Ereignisse, Fehler (mit Stacktraces), Datenbankinteraktionen und Healthcheck-Aufrufe werden im Backend geloggt, was die Diagnose von Problemen erheblich erleichtert.
 
-**Verifizierung des Stacks:**
+## Verifizierung des robusten Stacks
+
+Um die Stabilität und korrekte Fehlerbehandlung des Stacks zu verifizieren, führe folgende Schritte aus:
 
 1.  **Stack starten:**
-    Führe im Wurzelverzeichnis des Projekts den Befehl aus:
+    Stelle sicher, dass das Projekt geklont, die `.env` Datei (insbesondere `DB_PASSWORD`) konfiguriert und das Datenbankschema (wie oben beschrieben) manuell erstellt wurde. Starte dann den Stack:
     ```bash
     docker compose up --build -d
     ```
-    Warte einige Momente (ca. 45-60 Sekunden), bis alle Dienste initialisiert sind und die Healthchecks greifen.
+    Warte etwa 45-60 Sekunden, damit alle Dienste vollständig initialisieren und die Healthchecks ihre ersten Prüfungen durchführen können.
 
 2.  **Healthcheck-Status überprüfen:**
-    Öffne ein Terminal und führe folgenden Befehl aus:
+    Führe in einem Terminal im Projektverzeichnis aus:
     ```bash
     docker compose ps
     ```
-    In der Ausgabe sollten die Dienste `postgres_db_service` und `backend_api_service` (bzw. der Service-Name `backend`, falls `container_name` nicht für die `ps`-Ausgabe primär ist) in der `STATUS`-Spalte den Zusatz `(healthy)` aufweisen. Dies bestätigt, dass die Healthchecks erfolgreich sind.
+    **Erwartetes Ergebnis:** In der `STATUS`-Spalte sollten sowohl `postgres_db_service` als auch `backend_api_service` (der Containername für den `backend`-Service) den Zusatz `(healthy)` anzeigen. Die `frontend_web_app` sollte `running` oder `Up` anzeigen.
+    *   **Interpretation:** Ein `(healthy)`-Status für das Backend bedeutet, dass der Node.js-Server läuft UND die Verbindung zur PostgreSQL-Datenbank erfolgreich über den `/health`-Endpunkt getestet wurde.
 
-3.  **Ende-zu-Ende Funktionalität (CRUD) testen:**
-    *   Öffne deinen Webbrowser und navigiere zu `http://localhost:8080`.
-    *   **Create:** Füge eine oder mehrere neue Notizen über das Formular hinzu. Überprüfe, ob sie in der Liste erscheinen und der "fliegende Notizzettel"-Effekt ausgelöst wird.
-    *   **Read:** Verifiziere, dass alle hinzugefügten Notizen korrekt angezeigt werden. Lade die Seite neu, um sicherzustellen, dass die Daten vom Backend geladen werden. Teste die Such-, Filter- und Sortierfunktionen.
-    *   **Update:** Bearbeite den Text einer bestehenden Notiz und speichere die Änderung. Markiere eine Notiz als "erledigt" über die Checkbox. Überprüfe, ob die Änderungen korrekt dargestellt werden und ggf. der "fliegende Notizzettel"-Effekt beim Speichern ausgelöst wird.
-    *   **Delete:** Lösche eine Notiz. Sie sollte aus der Liste verschwinden.
-    *   **Persistenz-Test:**
-        1.  Füge einige Notizen hinzu oder ändere bestehende.
-        2.  Stoppe und starte die Datenbank und das Backend neu:
-            ```bash
-            docker compose restart database backend
-            ```
-        3.  Lade die Anwendung im Browser (`http://localhost:8080`) neu. Die zuvor erstellten/geänderten Notizen müssen weiterhin vorhanden und korrekt sein.
-    *   **Theme-Switcher:** Teste den Light/Dark-Mode Umschalter. Die Einstellung sollte auch nach einem Neuladen der Seite erhalten bleiben.
+3.  **Ende-zu-Ende Funktionalität (CRUD) im Normalbetrieb testen:**
+    *   Öffne `http://localhost:8080` im Browser.
+    *   Führe alle CRUD-Operationen durch: Erstelle Notizen, bearbeite sie, markiere sie als erledigt/offen, lösche sie. Teste auch die Such-, Filter- und Sortierfunktionen sowie den Theme-Switcher.
+    *   **Erwartetes Ergebnis:** Alle Operationen funktionieren wie erwartet. Die Änderungen sind persistent.
 
-4.  **(Optional) Direkter Datenbankzugriff:**
-    Verbinde dich mit einem Datenbank-Tool (z.B. DBeaver, pgAdmin) mit der PostgreSQL-Datenbank über den gemappten Port (standardmäßig `localhost:5433`, Benutzer `myuser`, Passwort `supersecretpassword`, Datenbank `notizblockdb`) und inspiziere den Inhalt der `notes`-Tabelle, um die Daten direkt zu verifizieren.
+4.  **Robustheit gegen Datenbankausfall testen:**
+    *   **a) Datenbank stoppen:**
+        ```bash
+        docker compose stop database
+        ```
+    *   **b) Backend-Healthcheck beobachten:**
+        Führe nach ca. 20-30 Sekunden erneut `docker compose ps` aus.
+        **Erwartetes Ergebnis:** Der `backend_api_service` sollte jetzt den Status `(unhealthy)` haben.
+        Die Backend-Logs (`docker compose logs backend`) sollten Fehler wie `Healthcheck: Datenbankverbindung fehlgeschlagen im /health Endpoint {"error":"getaddrinfo ENOTFOUND database", ...}` zeigen.
+    *   **c) Frontend-Verhalten prüfen:**
+        Versuche im Browser, die Notizen neu zu laden oder eine neue Notiz zu erstellen.
+        **Erwartetes Ergebnis:** Das Frontend sollte nicht abstürzen. Stattdessen sollte eine Fehlermeldung (z.B. via Toastify) erscheinen, die sinngemäß lautet "Fehler beim Laden/Speichern der Notizen. Bitte versuchen Sie es später erneut." Die Nginx-Logs (`docker compose logs frontend`) zeigen möglicherweise einen 50x-Fehler für die `/api/notes`-Anfragen.
+    *   **d) Datenbank wieder starten:**
+        ```bash
+        docker compose start database
+        ```
+    *   **e) Wiederherstellung beobachten:**
+        Führe nach einiger Zeit (ca. 30-60 Sekunden) erneut `docker compose ps` aus.
+        **Erwartetes Ergebnis:** Sowohl `database` als auch `backend_api_service` sollten wieder `(healthy)` sein.
+        Die Backend-Logs sollten wieder erfolgreiche Healthcheck-Aufrufe zeigen.
+        Das Frontend sollte nach einem Neuladen der Seite oder beim nächsten API-Aufruf wieder normal funktionieren und die Daten korrekt anzeigen/verarbeiten.
+
+5.  **Robustheit gegen ungültige Anfragen testen:**
+    *   Versuche im Frontend, eine Notiz ohne Text zu erstellen (falls die UI dies zulässt, ansonsten ist dies ein guter Test für direkte API-Aufrufe).
+    *   Oder sende eine ungültige Anfrage mit `curl` (aus einem Host-Terminal):
+        ```bash
+        curl -X POST -H "Content-Type: application/json" -d '{}' http://localhost:8080/api/notes
+        ```
+    *   **Erwartetes Ergebnis:** Das Backend sollte mit einem HTTP `400 Bad Request` antworten. Die Frontend-Logs (Nginx) zeigen den `400`-Status. Die Backend-Logs (`docker compose logs backend`) sollten eine Warnung wie `Controller: Ungültiger Text in createNote - Text fehlt oder ist leer ...` anzeigen. Das Frontend (falls der Fehler dort ausgelöst wurde) sollte eine entsprechende Fehlermeldung anzeigen. Die Anwendung darf nicht abstürzen.
+
+6.  **Logs einsehen und interpretieren:**
+    *   **Backend-Logs:** `docker compose logs backend` oder `docker compose logs -f backend` (für Live-Verfolgung). Achte auf Startmeldungen, Datenbankverbindungsstatus, Aufrufe der API-Routen, Healthcheck-Meldungen und insbesondere auf Fehlermeldungen (mit Stacktraces), die während der Fehler-Simulationen auftreten.
+    *   **Frontend-Logs (Nginx):** `docker compose logs frontend`. Zeigt eingehende HTTP-Anfragen an den Nginx-Server und die von Nginx an den Client gesendeten Statuscodes (z.B. 200, 400, 500, 503).
+    *   **Datenbank-Logs:** `docker compose logs database`. Nützlich, um zu sehen, ob die Datenbank korrekt startet oder Verbindungsversuche erhält.
+
+Durch diese Verifizierungsschritte kann die implementierte Robustheit und Fehlerbehandlung des Stacks nachgewiesen werden.
 
 ## Wichtige Services und Ports
 
@@ -201,7 +234,7 @@ Der finale Zustand des Stacks umfasst ein voll funktionsfähiges Full-Stack-Syst
 ## Logs anzeigen
 
 *   Logs aller Services: `docker compose logs`
-*   Logs des Backends: `docker compose logs backend` (zeigt DB-Verbindungsversuche, API-Anfragen, Healthcheck-Aufrufe etc.)
+*   Logs des Backends: `docker compose logs backend`
 *   Logs des Frontends (Nginx): `docker compose logs frontend`
 *   Logs der Datenbank: `docker compose logs database`
 *   Live-Verfolgung (z.B. Backend): `docker compose logs -f backend`
@@ -218,7 +251,7 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 
 ## Code-Qualität und Konventionen
 
-*   **Sicherheit:** Es werden parametrisierte Abfragen im Backend verwendet, um SQL Injection zu verhindern.
+*   **Sicherheit:** Es werden parametrisierte Abfragen im Backend verwendet, um SQL Injection zu verhindern. Es erfolgt eine grundlegende Validierung von Eingabedaten.
 *   **Module:** Das Backend verwendet ES-Module (`import`/`export`). Das Frontend ist komponentenbasiert aufgebaut.
 *   **.gitignore / .dockerignore:** Diese Dateien sind konfiguriert, um unnötige Dateien und sensible Informationen (wie `.env`) von der Versionskontrolle bzw. dem Docker-Build-Kontext auszuschließen.
 ```
