@@ -7,7 +7,6 @@ import { getNotes, addNote, updateNote, deleteNote, toggleNoteCompleted } from '
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-
 function App() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,82 +14,72 @@ function App() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortOrder, setSortOrder] = useState('newest');
   const [flyingNoteData, setFlyingNoteData] = useState(null);
-
   useEffect(() => {
-    setLoading(true);
-    getNotes()
-      .then((response) => {
+    const fetchNotes = async () => {
+      setLoading(true);
+      try {
+        const response = await getNotes();
         setNotes(Array.isArray(response.data) ? response.data : []);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Fehler beim Laden der Notizen:', err);
         toast.error("Fehler beim Laden der Notizen!");
         setNotes([]);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchNotes();
   }, []);
-
-  const handleAddNote = (noteText, startPos) => {
-    addNote(noteText)
-      .then((response) => {
-        const newNote = response.data;
-        setNotes((prevNotes) => [...prevNotes, newNote]);
-        toast.success("Notiz hinzugefügt!");
-        setFlyingNoteData({ id: Date.now(), text: newNote.text, startPos: startPos });
-      })
-      .catch((err) => {
-        console.error('Fehler beim Hinzufügen:', err);
-        toast.error("Fehler beim Hinzufügen der Notiz.");
-      });
+  const handleAddNote = async (noteText, startPos) => {
+    try {
+      const response = await addNote(noteText);
+      const newNote = response.data;
+      setNotes((prevNotes) => [...prevNotes, newNote]);
+      toast.success("Notiz hinzugefügt!");
+      setFlyingNoteData({ id: Date.now(), text: newNote.text, startPos: startPos });
+    } catch (err) {
+      console.error('Fehler beim Hinzufügen:', err);
+      toast.error("Fehler beim Hinzufügen der Notiz.");
+    }
   };
-
-  const handleUpdateNote = (idToUpdate, newText) => {
-    updateNote(idToUpdate, newText)
-      .then((response) => {
-        const updatedNote = response.data;
-        setNotes((prevNotes) =>
-          prevNotes.map((note) => (note.id === idToUpdate ? updatedNote : note))
-        );
-        toast.info("Notiz aktualisiert!");
-        setFlyingNoteData({ id: Date.now(), text: updatedNote.text, startPos: null });
-      })
-      .catch((err) => {
-        console.error('Fehler beim Aktualisieren:', err);
-        toast.error("Fehler beim Aktualisieren der Notiz.");
-      });
+  const handleUpdateNote = async (idToUpdate, newText) => {
+    try {
+      const response = await updateNote(idToUpdate, newText);
+      const updatedNote = response.data;
+      setNotes((prevNotes) =>
+        prevNotes.map((note) => (note.id === idToUpdate ? updatedNote : note))
+      );
+      toast.info("Notiz aktualisiert!");
+      setFlyingNoteData({ id: Date.now(), text: updatedNote.text, startPos: null });
+    } catch (err) {
+      console.error('Fehler beim Aktualisieren:', err);
+      toast.error("Fehler beim Aktualisieren der Notiz.");
+    }
   };
-
-  const handleDeleteNote = (idToDelete) => {
-    deleteNote(idToDelete)
-      .then(() => {
-        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== idToDelete));
-        toast.warn("Notiz gelöscht.");
-      })
-      .catch((err) => {
-        console.error('Fehler beim Löschen:', err);
-        toast.error("Fehler beim Löschen der Notiz.");
-      });
+  const handleDeleteNote = async (idToDelete) => {
+    try {
+      await deleteNote(idToDelete);
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== idToDelete));
+      toast.warn("Notiz gelöscht.");
+    } catch (err) {
+      console.error('Fehler beim Löschen:', err);
+      toast.error("Fehler beim Löschen der Notiz.");
+    }
   };
-
-  const handleToggleComplete = (idToToggle) => {
-    toggleNoteCompleted(idToToggle)
-      .then((response) => {
-        setNotes((prevNotes) =>
-          prevNotes.map((note) => (note.id === idToToggle ? response.data : note))
-        );
-      })
-      .catch((err) => {
-        console.error('Fehler beim Umschalten:', err);
-        toast.error("Fehler beim Ändern des Status.");
-      });
+  const handleToggleComplete = async (idToToggle) => {
+    try {
+      const response = await toggleNoteCompleted(idToToggle);
+      setNotes((prevNotes) =>
+        prevNotes.map((note) => (note.id === idToToggle ? response.data : note))
+      );
+    } catch (err) {
+      console.error('Fehler beim Umschalten:', err);
+      toast.error("Fehler beim Ändern des Status.");
+    }
   };
-
   const handleFlyingNoteAnimationComplete = () => {
     setFlyingNoteData(null);
   };
-
   const processedNotes = notes
     .filter(note =>
       note.text.toLowerCase().includes(searchTerm.toLowerCase())
@@ -113,7 +102,6 @@ function App() {
           return new Date(b.created_at) - new Date(a.created_at);
       }
     });
-
   return (
     <div className="App">
       <ThemeSwitcher />
@@ -129,7 +117,6 @@ function App() {
           pauseOnHover
           theme="colored"
       />
-
       {flyingNoteData && (
         <FlyingNote
           key={flyingNoteData.id}
@@ -138,7 +125,6 @@ function App() {
           onAnimationComplete={handleFlyingNoteAnimationComplete}
         />
       )}
-
       <h1>Mini Notizblock</h1>
       <NoteForm onAddNote={handleAddNote} />
       <div style={{ margin: '1rem 0' }}>
@@ -205,5 +191,4 @@ function App() {
     </div>
   );
 }
-
 export default App;
