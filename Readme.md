@@ -1,22 +1,24 @@
 ```markdown
-# React Docker Notizblock App (Full-Stack mit Docker Compose & PostgreSQL)
+# React Docker Notizblock App (Full-Stack auf Docker Swarm)
 
-Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die gesamte Anwendung wird mit Docker Compose orchestriert und beinhaltet:
+Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die gesamte Anwendung wird mit Docker Compose für die lokale Entwicklung und mit **Docker Swarm für ein verteiltes Deployment** orchestriert. Sie beinhaltet:
 *   Ein Frontend, das mit Vite gebaut und von Nginx als Webserver und Reverse Proxy ausgeliefert wird.
 *   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer **PostgreSQL-Datenbank** speichert.
 *   Eine PostgreSQL-Datenbank als dedizierter Service.
-*   Integrierte Healthchecks für Datenbank und Backend zur Sicherstellung der Diensteverfügbarkeit und Robustheit der Anwendung.
+*   Integrierte, aussagekräftige Healthchecks für Datenbank und Backend zur Sicherstellung der Diensteverfügbarkeit und Robustheit der Anwendung.
+*   Deployment auf einem Docker Swarm Cluster mit spezifischer **Node-Platzierung** für jeden Dienst (Frontend auf `worker1` mit Label `role=frontend`, Backend auf `worker2` mit Label `role=backend`, Datenbank auf `worker3` mit Label `role=database`).
 
 ## Projektstruktur
 
 ```text
 .
 ├── .dockerignore
-├── .env                  
+├── .env                  # Lokale Umgebungsvariablen (nicht versioniert)
 ├── .gitignore
-├── README.md             
-├── docker-compose.yml
-├── sql_schema_and_queries.md 
+├── README.md             # Diese Datei
+├── docker-stack.yml      # Für Docker Swarm Deployment
+├── docker-compose.yml    # Für lokale Entwicklung mit Docker Compose
+├── sql_schema_and_queries.md # Theoretische SQL Ausarbeitung
 │
 ├── backend/
 │   ├── .dockerignore
@@ -46,7 +48,7 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
     ├── .dockerignore
     ├── Dockerfile
     ├── index.html
-    ├── nginx.conf
+    ├── nginx.conf            # Nginx Konfiguration für Frontend und Proxy
     ├── package-lock.json
     ├── package.json
     ├── vite.config.js
@@ -70,180 +72,202 @@ Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node
 
 ## Screenshots
 
-**Aktuelle Screenshots (healthy, unhealthy):**
-
 *   Funktionierende Anwendung im Browser (CRUD):
     [![Anwendung läuft](assets)](assets)
-    
 
 
 ## Features
 
-*   Notizen anzeigen (Read)
-*   Neue Notizen hinzufügen (Create)
-*   Bestehende Notizen bearbeiten (Update)
-*   Notizen löschen (Delete)
-*   Status von Notizen umschalten (Erledigt/Offen)
-*   Backend-Datenpersistenz mittels **PostgreSQL-Datenbank** (über Docker Volume).
+*   Notizen anzeigen (Read), Neue Notizen hinzufügen (Create), Bestehende Notizen bearbeiten (Update), Notizen löschen (Delete).
+*   Status von Notizen umschalten (Erledigt/Offen).
+*   Backend-Datenpersistenz mittels **PostgreSQL-Datenbank** (über Docker Volume, auch im Swarm-Kontext).
 *   Datenbankverbindung mit `pg` Treiber und **Connection Pooling**.
-*   **Sichere API** durch parametrisierte SQL-Abfragen (Schutz vor SQL Injection) und grundlegende Eingabevalidierung im Backend.
-*   Vollständig containerisiert mit Docker: Frontend, Backend, Datenbank.
-*   Orchestrierung mit Docker Compose.
+*   **Sichere API** durch parametrisierte SQL-Abfragen und grundlegende Eingabevalidierung im Backend.
+*   Vollständig containerisiert mit Docker.
+*   Orchestrierung mit Docker Compose (für lokale Entwicklung) und **Docker Swarm** (für verteiltes Deployment).
+*   **Node Affinity im Swarm:** Gezielte Platzierung von Frontend, Backend und Datenbank auf separaten, gelabelten Worker Nodes.
 *   Frontend mit Nginx Reverse Proxy für API-Aufrufe an das Backend.
-*   **Robuste Fehlerbehandlung**: Das Backend stürzt bei DB-Verbindungsproblemen nicht ab und gibt sinnvolle Fehlercodes zurück. Das Frontend zeigt bei Backend-Fehlern nutzerfreundliche Meldungen an.
+*   **Robuste Fehlerbehandlung**: Das Backend stürzt bei DB-Verbindungsproblemen nicht ab. Das Frontend zeigt bei Backend-Fehlern nutzerfreundliche Meldungen.
 *   Umfassendes Logging wichtiger Ereignisse, DB-Verbindungsstatus und Fehler.
-*   **Aussagekräftige Healthchecks** für Datenbank- und Backend-Dienst, die die tatsächliche Funktionsfähigkeit (inkl. DB-Verbindung für das Backend) prüfen.
+*   **Aussagekräftige Healthchecks** für Datenbank- und Backend-Dienst, die die tatsächliche Funktionsfähigkeit (inkl. DB-Verbindung für das Backend) prüfen und im Swarm-Kontext den Dienstzustand korrekt widerspiegeln.
 *   Manueller Light/Dark-Mode Umschalter mit Persistenz im `localStorage`.
 *   Visueller Effekt "Fliegender Notizzettel" beim Speichern von Notizen.
 *   Client-seitige Such-, Filter- und Sortierfunktionen für Notizen.
 
 ## Voraussetzungen
 
-*   Docker
-*   Docker Compose (ist Teil von Docker Desktop)
+*   Docker & Docker Compose (für lokale Entwicklung und Image-Builds)
+*   Multipass (oder eine andere Methode, um mehrere Linux VMs für das Swarm Cluster zu erstellen)
 *   Git
+*   Ein Docker Hub Account (oder eine andere Docker Registry), um die Anwendungs-Images zu pushen.
 
-## Setup und Start mit Docker Compose
+## Lokales Setup und Start mit Docker Compose (für Entwicklung)
 
-1.  **Repository klonen:**
+Für die lokale Entwicklung kann der Stack mit `docker-compose.yml` gestartet werden.
+
+1.  **Repository klonen und navigieren:**
     ```bash
-    git clone https://github.com/sebriede6/Docker-Container.git
-    cd Docker-Container # Oder der Name deines Projektordners
+    git clone https://github.com/sebriede6/Docker-Container.git 
+    cd Docker-Container 
     ```
-2.  **(Empfohlen) Umgebungsvariablen konfigurieren:**
-    Erstelle eine Datei namens `.env` im Wurzelverzeichnis des Projekts (auf derselben Ebene wie `docker-compose.yml`).
+2.  **`.env`-Datei erstellen:**
+    Kopiere die `env.example`  zu `.env` oder erstelle eine neue `.env`-Datei im Projektwurzelverzeichnis mit Inhalt
     ```env
-    # .env (Beispielinhalt - passe dies an deine Bedürfnisse an)
-    DB_USER=jo
-    DB_PASSWORD=jo
-    DB_NAME=jo
+    # .env (Beispielinhalt für lokale Entwicklung)
+    DB_USER=myuser
+    DB_PASSWORD=supersecretpassword 
+    DB_NAME=notizblockdb
     BACKEND_PORT=3000
     LOG_LEVEL=debug
     ```
-    **Wichtig:** Die `.env`-Datei ist in `.gitignore` aufgeführt, um sensible Daten zu schützen. Ohne gesetztes `DB_PASSWORD` in der `.env` Datei wird die Datenbankverbindung fehlschlagen.
-
-3.  **Datenbank-Schema manuell erstellen (Einmalig):**
-    *   **a) Nur Datenbank starten:**
-        ```bash
-        docker compose up -d database
-        ```
-    *   **b) Warten, bis DB bereit ist (`(healthy)` Status):**
-        ```bash
-        docker compose ps
-        ```
-    *   **c) Schema anwenden:** Zuerst das initiale Schema, dann das Update-Schema.
-        ```bash
-        docker exec -i postgres_db_service psql -U ${DB_USER:-myuser} -d ${DB_NAME:-notizblockdb} < backend/sql/initial_schema.sql
-        docker exec -i postgres_db_service psql -U ${DB_USER:-myuser} -d ${DB_NAME:-notizblockdb} < backend/sql/update_schema_add_completed.sql
-        ```
-        *(Bei Erfolg sollten keine Fehler, sondern Meldungen wie CREATE TABLE, ALTER TABLE etc. erscheinen).*
-
-4.  **Gesamte Anwendung bauen und starten:**
-    Führe im Wurzelverzeichnis des Projekts folgenden Befehl aus:
+3.  **Datenbankschema erstellen (einmalig für lokales Volume):**
+    ```bash
+    docker compose up -d database
+    # Warten bis DB healthy (docker compose ps)
+    docker exec -i postgres_db_service psql -U ${DB_USER:-myuser} -d ${DB_NAME:-notizblockdb} < backend/sql/initial_schema.sql
+    docker exec -i postgres_db_service psql -U ${DB_USER:-myuser} -d ${DB_NAME:-notizblockdb} < backend/sql/update_schema_add_completed.sql
+    ```
+4.  **Stack starten:**
     ```bash
     docker compose up --build -d
     ```
-    *   `--build`: Baut die Images bei Code-Änderungen neu.
-    *   `-d`: Startet die Container im Hintergrund.
+    Die Anwendung ist unter `http://localhost:8080` erreichbar.
 
-## Finaler, robuster Zustand des Stacks und umgesetzte Stabilitätsmaßnahmen
+---
 
-Der aktuelle Stack stellt eine robuste Full-Stack-Anwendung dar, die für einen stabileren Betrieb, auch unter widrigen Umständen, ausgelegt ist. Die wichtigsten Stabilitätsmaßnahmen umfassen:
+## Deployment auf Docker Swarm Cluster
 
-*   **Persistente Datenspeicherung:** Alle Notizdaten werden zuverlässig in der PostgreSQL-Datenbank gespeichert und bleiben über Neustarts der Anwendung hinweg erhalten (solange das Docker Volume `postgres_data` nicht gelöscht wird).
-*   **Vollständige CRUD-Funktionalität:** Alle Kernoperationen zum Erstellen, Lesen, Aktualisieren und Löschen von Notizen sind implementiert und funktionieren Ende-zu-Ende.
-*   **Robuste Fehlerbehandlung im Backend:**
-    *   Das Backend fängt Fehler bei Datenbankoperationen ab und stürzt nicht ab. Stattdessen werden über einen zentralen Fehlerhandler HTTP-Statuscodes (z.B. 500) an den Client gesendet.
-    *   Grundlegende Eingabevalidierung (z.B. für leere Notiztexte) ist implementiert und führt zu HTTP 400-Fehlern mit entsprechenden Meldungen.
-*   **Fehlertolerantes Frontend:**
-    *   Das React-Frontend fängt Fehler, die vom Backend kommen (z.B. 500, 503, 400), in seinen API-Aufrufen ab.
-    *   Anstatt abzustürzen oder eine leere Seite anzuzeigen, werden dem Benutzer über `react-toastify` verständliche Fehlermeldungen angezeigt (z.B. "Notizen konnten nicht geladen werden. Bitte versuchen Sie es später erneut.").
-*   **Aussagekräftige Healthchecks:**
-    *   Der **PostgreSQL-Dienst** nutzt `pg_isready`, um seine Bereitschaft zur Annahme von Verbindungen zu signalisieren.
-    *   Der **Backend-Dienst** hat einen `/health`-Endpunkt, der nicht nur die Lauffähigkeit des Node.js-Prozesses prüft, sondern auch aktiv eine Testverbindung/-abfrage zur Datenbank herstellt. Nur wenn beides erfolgreich ist, meldet der Dienst `healthy`. Dies stellt sicher, dass das Backend wirklich funktionsfähig ist.
-    *   Die `docker-compose.yml` nutzt `depends_on` mit der `service_healthy`-Bedingung, um eine korrekte Startreihenfolge der voneinander abhängigen Dienste zu gewährleisten.
-*   **Umfassendes Logging:** Wichtige Ereignisse, Fehler (mit Stacktraces), Datenbankinteraktionen und Healthcheck-Aufrufe werden im Backend geloggt, was die Diagnose von Problemen erheblich erleichtert.
+Dieser Abschnitt beschreibt, wie die Anwendung auf einem vorbereiteten Docker Swarm Cluster deployed wird, wobei die Dienste auf spezifischen Nodes laufen.
 
-## Verifizierung des robusten Stacks
+### 1. Docker Swarm Cluster einrichten (Beispiel mit Multipass VMs)
 
-Um die Stabilität und korrekte Fehlerbehandlung des Stacks zu verifizieren, führe folgende Schritte aus:
-
-1.  **Stack starten:**
-    Stelle sicher, dass das Projekt geklont, die `.env` Datei (insbesondere `DB_PASSWORD`) konfiguriert und das Datenbankschema (wie oben beschrieben) manuell erstellt wurde. Starte dann den Stack:
+1.  **VMs erstellen:** Erstelle vier Multipass VMs (z.B. `manager`, `worker1`, `worker2`, `worker3`).
+2.  **Docker installieren:** Installiere Docker auf allen vier VMs.
+3.  **Swarm initialisieren:** Auf der `manager`-VM (ersetze `<MANAGER_IP>` mit der IP der Manager-VM):
     ```bash
-    docker compose up --build -d
+    docker swarm init --advertise-addr <MANAGER_IP>
     ```
-    Warte etwa 45-60 Sekunden, damit alle Dienste vollständig initialisieren und die Healthchecks ihre ersten Prüfungen durchführen können.
-
-2.  **Healthcheck-Status überprüfen:**
-    Führe in einem Terminal im Projektverzeichnis aus:
+    Kopiere den ausgegebenen `docker swarm join ...` Befehl.
+4.  **Worker Nodes beitreten lassen:** Führe den kopierten Join-Befehl auf `worker1`, `worker2` und `worker3` aus.
+5.  **Worker Nodes labeln:** Auf der `manager`-VM:
     ```bash
-    docker compose ps
+    docker node update --label-add role=frontend worker1
+    docker node update --label-add role=backend worker2
+    docker node update --label-add role=database worker3
+    # Überprüfen mit: docker node ls -q | xargs docker node inspect -f '{{ .Description.Hostname }}: {{ .Spec.Labels }}'
     ```
-    **Erwartetes Ergebnis:** In der `STATUS`-Spalte sollten sowohl `postgres_db_service` als auch `backend_api_service` (der Containername für den `backend`-Service) den Zusatz `(healthy)` anzeigen. Die `frontend_web_app` sollte `running` oder `Up` anzeigen.
-    *   **Interpretation:** Ein `(healthy)`-Status für das Backend bedeutet, dass der Node.js-Server läuft UND die Verbindung zur PostgreSQL-Datenbank erfolgreich über den `/health`-Endpunkt getestet wurde.
 
-3.  **Ende-zu-Ende Funktionalität (CRUD) im Normalbetrieb testen:**
-    *   Öffne `http://localhost:8080` im Browser.
-    *   Führe alle CRUD-Operationen durch: Erstelle Notizen, bearbeite sie, markiere sie als erledigt/offen, lösche sie. Teste auch die Such-, Filter- und Sortierfunktionen sowie den Theme-Switcher.
-    *   **Erwartetes Ergebnis:** Alle Operationen funktionieren wie erwartet. Die Änderungen sind persistent.
+### 2. Anwendungs-Images vorbereiten und pushen
 
-4.  **Robustheit gegen Datenbankausfall testen:**
-    *   **a) Datenbank stoppen:**
-        ```bash
-        docker compose stop database
-        ```
-    *   **b) Backend-Healthcheck beobachten:**
-        Führe nach ca. 20-30 Sekunden erneut `docker compose ps` aus.
-        **Erwartetes Ergebnis:** Der `backend_api_service` sollte jetzt den Status `(unhealthy)` haben.
-        Die Backend-Logs (`docker compose logs backend`) sollten Fehler wie `Healthcheck: Datenbankverbindung fehlgeschlagen im /health Endpoint {"error":"getaddrinfo ENOTFOUND database", ...}` zeigen.
-    *   **c) Frontend-Verhalten prüfen:**
-        Versuche im Browser, die Notizen neu zu laden oder eine neue Notiz zu erstellen.
-        **Erwartetes Ergebnis:** Das Frontend sollte nicht abstürzen. Stattdessen sollte eine Fehlermeldung (z.B. via Toastify) erscheinen, die sinngemäß lautet "Fehler beim Laden/Speichern der Notizen. Bitte versuchen Sie es später erneut." Die Nginx-Logs (`docker compose logs frontend`) zeigen möglicherweise einen 50x-Fehler für die `/api/notes`-Anfragen.
-    *   **d) Datenbank wieder starten:**
-        ```bash
-        docker compose start database
-        ```
-    *   **e) Wiederherstellung beobachten:**
-        Führe nach einiger Zeit (ca. 30-60 Sekunden) erneut `docker compose ps` aus.
-        **Erwartetes Ergebnis:** Sowohl `database` als auch `backend_api_service` sollten wieder `(healthy)` sein.
-        Die Backend-Logs sollten wieder erfolgreiche Healthcheck-Aufrufe zeigen.
-        Das Frontend sollte nach einem Neuladen der Seite oder beim nächsten API-Aufruf wieder normal funktionieren und die Daten korrekt anzeigen/verarbeiten.
+1.  **Images bauen:** Stelle sicher, dass die Dockerfiles (`backend/Dockerfile` muss `curl` enthalten) aktuell sind. Baue die Images lokal:
+    ```bash
+    # Im Projektwurzelverzeichnis ausführen
+    docker build -t DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-backend:latest ./backend
+    docker build -t DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-frontend:latest --build-arg VITE_API_URL=/api ./frontend
+    ```
+2.  **Einloggen und Pushen zu Docker Hub:**
+    ```bash
+    docker login
+    docker push DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-backend:latest
+    docker push DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-frontend:latest
+    ```
 
-5.  **Robustheit gegen ungültige Anfragen testen:**
-    *   Versuche im Frontend, eine Notiz ohne Text zu erstellen (falls die UI dies zulässt, ansonsten ist dies ein guter Test für direkte API-Aufrufe).
-    *   Oder sende eine ungültige Anfrage mit `curl` (aus einem Host-Terminal):
-        ```bash
-        curl -X POST -H "Content-Type: application/json" -d '{}' http://localhost:8080/api/notes
-        ```
-    *   **Erwartetes Ergebnis:** Das Backend sollte mit einem HTTP `400 Bad Request` antworten. Die Frontend-Logs (Nginx) zeigen den `400`-Status. Die Backend-Logs (`docker compose logs backend`) sollten eine Warnung wie `Controller: Ungültiger Text in createNote - Text fehlt oder ist leer ...` anzeigen. Das Frontend (falls der Fehler dort ausgelöst wurde) sollte eine entsprechende Fehlermeldung anzeigen. Die Anwendung darf nicht abstürzen.
+### 3. Stack Datei (`docker-stack.yml`) vorbereiten und kopieren
 
-6.  **Logs einsehen und interpretieren:**
-    *   **Backend-Logs:** `docker compose logs backend` oder `docker compose logs -f backend` (für Live-Verfolgung). Achte auf Startmeldungen, Datenbankverbindungsstatus, Aufrufe der API-Routen, Healthcheck-Meldungen und insbesondere auf Fehlermeldungen (mit Stacktraces), die während der Fehler-Simulationen auftreten.
-    *   **Frontend-Logs (Nginx):** `docker compose logs frontend`. Zeigt eingehende HTTP-Anfragen an den Nginx-Server und die von Nginx an den Client gesendeten Statuscodes (z.B. 200, 400, 500, 503).
-    *   **Datenbank-Logs:** `docker compose logs database`. Nützlich, um zu sehen, ob die Datenbank korrekt startet oder Verbindungsversuche erhält.
+Die `docker-stack.yml` (siehe Projektverzeichnis) ist für das Swarm-Deployment konfiguriert. Sie enthält `deploy` Sektionen mit `placement.constraints`, um die Dienste auf den gelabelten Nodes zu platzieren.
+Kopiere die `docker-stack.yml` auf den Swarm Manager (z.B. nach `/home/ubuntu/docker-stack.yml`).
 
-Durch diese Verifizierungsschritte kann die implementierte Robustheit und Fehlerbehandlung des Stacks nachgewiesen werden.
+### 4. Umgebungsvariablen auf dem Manager setzen (entscheidend!)
 
-## Wichtige Services und Ports
+Bevor der Stack deployed wird, müssen die notwendigen Umgebungsvariablen (insbesondere `DB_PASSWORD`) auf dem Swarm Manager in der Shell-Sitzung gesetzt werden:
+```bash
+# Auf der manager-VM ausführen, BEVOR 'docker stack deploy'
+export DB_USER="myuser"                 # Oder dein Wert aus der lokalen .env
+export DB_PASSWORD="DEIN_PASSWORT_HIER" # Ersetzen durch das Passwort, das auch PG verwenden soll!
+export DB_NAME="notizblockdb"           # Oder dein Wert
+export BACKEND_PORT="3000"              # Oder dein Wert
+export LOG_LEVEL="info"                 # Oder dein Wert
+```
 
-*   **Frontend (Nginx):** Erreichbar unter `http://localhost:8080`. Leitet API-Anfragen (`/api/*`) an das Backend weiter.
-*   **Backend (Node.js API):** Lauscht intern im Docker-Netzwerk auf Port 3000 (oder dem Wert von `BACKEND_PORT`). Verbindet sich mit dem `database`-Service für Datenoperationen.
-*   **Datenbank (PostgreSQL):** Lauscht intern auf Port 5432. Ist optional auf Host-Port `5433` gemappt für direkten Zugriff mit DB-Tools. Speichert Daten im benannten Volume `postgres_data`.
+### 5. Datenbank-Schema im Swarm-DB-Container erstellen (einmalig pro neuem DB-Volume)
 
-## Logs anzeigen
+Da der Datenbankdienst im Swarm mit einem Volume auf `worker3` startet, muss das Schema einmalig angewendet werden:
+1.  Kopiere die SQL-Skripte (`backend/sql/...`) auf den `worker3`-Node (z.B. nach `/home/ubuntu/`).
+2.  Nachdem der Stack deployed wurde (nächster Schritt) und der `notizapp_database`-Task auf `worker3` läuft, finde dessen Container-ID (mit `docker ps` auf `worker3`).
+3.  Führe auf `worker3` aus (Pfade und die zuvor exportierten Credentials für `DB_USER` und `DB_NAME` verwenden):
+    ```bash
+    # Auf worker3
+    docker exec -i <DB_CONTAINER_ID_AUF_WORKER3> psql -U myuser -d notizblockdb < /home/ubuntu/initial_schema.sql
+    docker exec -i <DB_CONTAINER_ID_AUF_WORKER3> psql -U myuser -d notizblockdb < /home/ubuntu/update_schema_add_completed.sql
+    ```
 
-*   Logs aller Services: `docker compose logs`
-*   Logs des Backends: `docker compose logs backend`
-*   Logs des Frontends (Nginx): `docker compose logs frontend`
-*   Logs der Datenbank: `docker compose logs database`
-*   Live-Verfolgung (z.B. Backend): `docker compose logs -f backend`
+### 6. Stack auf Swarm deployen
 
-## Anwendung stoppen
+Führe auf dem Swarm Manager im Verzeichnis mit der `docker-stack.yml` aus:
+```bash
+# Auf dem manager VM
+docker stack rm notizapp # Sicherstellen, dass kein alter Stack läuft (optional, falls Update)
+docker stack deploy -c docker-stack.yml notizapp
+```
 
-*   Container stoppen: `docker compose stop`
-*   Container stoppen & entfernen (Daten im DB-Volume bleiben erhalten): `docker compose down`
-*   Container stoppen, entfernen & **DB-Volume löschen** (ACHTUNG: Alle Notizdaten gehen verloren!): `docker compose down -v`
+## Verifizierung des Deployments auf Docker Swarm
+
+Nach dem Deployment des Stacks (`notizapp`) können folgende Schritte zur Verifizierung durchgeführt werden:
+
+1.  **Gesamtstatus der Dienste im Stack prüfen:**
+    Auf dem Swarm Manager:
+    ```bash
+    docker stack services notizapp
+    ```
+    **Erwartetes Ergebnis:** Alle Dienste (`notizapp_database`, `notizapp_backend`, `notizapp_frontend`) sollten in der Spalte `REPLICAS` den Wert `1/1` anzeigen.
+
+2.  **Korrekte Platzierung der Dienste und Task-Zustand prüfen:**
+    Führe für jeden Dienst auf dem Swarm Manager aus:
+    ```bash
+    docker service ps notizapp_database
+    docker service ps notizapp_backend
+    docker service ps notizapp_frontend
+    ```
+    **Erwartetes Ergebnis:**
+    *   **`NODE` Spalte:** Zeigt den korrekten Worker-Node gemäß den `placement.constraints` an (`worker3` für DB, `worker2` für Backend, `worker1` für Frontend, basierend auf den Labels `role=database`, `role=backend`, `role=frontend`).
+    *   **`CURRENT STATE` Spalte:** Sollte `Running ...` anzeigen. Für `database` und `backend` impliziert ein stabiler `Running`-Status nach der `start_period` einen erfolgreichen Healthcheck.
+
+3.  **Zugriff auf die Anwendung und E2E-Funktionalität testen:**
+    *   Ermittle die IP-Adresse eines beliebigen Nodes im Swarm Cluster (z.B. die IP von `worker1`, auf dem das Frontend läuft, via `multipass info worker1`).
+    *   Öffne im Browser deines Host-Rechners: `http://<IP_DES_SWARM_NODES>`.
+    *   **Teste alle CRUD-Operationen** und andere Frontend-Features.
+    *   **Erwartetes Ergebnis:** Die Anwendung ist voll funktionsfähig.
+
+4.  **Logs der Dienste einsehen:**
+    ```bash
+    docker service logs notizapp_backend # usw. für andere Dienste
+    ```
+    **Interpretation:** Backend-Logs sollten erfolgreiche DB-Verbindungen und periodische `/health`-Aufrufe zeigen.
+
+5.  **Robustheit gegen simulierte Fehler verifizieren (Beispiel: Datenbankausfall):**
+    *   **a) Datenbank-Dienst skalieren:** `docker service scale notizapp_database=0` (auf dem Manager).
+    *   **b) Verhalten beobachten:** `docker service ps notizapp_backend` sollte nach kurzer Zeit fehlgeschlagene Tasks oder einen nicht gesunden Zustand zeigen. Das Frontend sollte eine Fehlermeldung anzeigen.
+    *   **c) Datenbank-Dienst wieder starten:** `docker service scale notizapp_database=1`.
+    *   **d) Wiederherstellung prüfen:** Nach kurzer Zeit sollten alle Dienste wieder `1/1 Running` sein. Die Anwendung im Browser sollte wieder funktionieren.
+
+## Wichtige Services und Ports (im Swarm Kontext)
+
+*   **Frontend (Nginx):** Erreichbar über Port 80 auf der IP-Adresse **jedes beliebigen Nodes** im Swarm Cluster (dank Swarm Routing Mesh). Leitet API-Anfragen (`/api/*`) an den `backend`-Service weiter.
+*   **Backend (Node.js API):** Lauscht intern im Swarm Overlay-Netzwerk auf dem konfigurierten Port (z.B. 3000). Erreichbar für das Frontend über den Service-Namen `backend`.
+*   **Datenbank (PostgreSQL):** Lauscht intern im Swarm Overlay-Netzwerk auf Port 5432. Erreichbar für das Backend über den Service-Namen `database`.
+
+## Logs anzeigen (im Swarm Kontext)
+
+*   Logs eines spezifischen Dienstes im Stack: `docker service logs notizapp_<dienstname>` (z.B. `docker service logs notizapp_backend`)
+
+## Anwendung im Swarm stoppen/entfernen
+
+*   Stack entfernen (löscht alle Dienste, Netzwerke des Stacks):
+    ```bash
+    # Auf dem manager VM
+    docker stack rm notizapp
+    ```
+*   Um auch das benannte Swarm-Volume `postgres_data_swarm` zu entfernen, muss dies auf dem Node geschehen, auf dem es erstellt wurde (`worker3`).
 
 ## SQL Recap & Datenmodell
 
@@ -253,5 +277,5 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 
 *   **Sicherheit:** Es werden parametrisierte Abfragen im Backend verwendet, um SQL Injection zu verhindern. Es erfolgt eine grundlegende Validierung von Eingabedaten.
 *   **Module:** Das Backend verwendet ES-Module (`import`/`export`). Das Frontend ist komponentenbasiert aufgebaut.
-*   **.gitignore / .dockerignore:** Diese Dateien sind konfiguriert, um unnötige Dateien und sensible Informationen (wie `.env`) von der Versionskontrolle bzw. dem Docker-Build-Kontext auszuschließen.
+*   **.gitignore / .dockerignore:** Diese Dateien sind konfiguriert, um unnötige Dateien und sensible Informationen (wie `.env` für die lokale Entwicklung) von der Versionskontrolle bzw. dem Docker-Build-Kontext auszuschließen.
 ```

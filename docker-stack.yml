@@ -1,0 +1,82 @@
+services:
+  database:
+    image: postgres:17-alpine 
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD} 
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data_swarm:/var/lib/postgresql/data 
+    networks:
+      - app_net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == database 
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    image: sebriede66/mein-notizblock-backend:latest 
+    environment:
+      PORT: ${BACKEND_PORT}
+      DB_HOST: database 
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD} 
+      DB_NAME: ${DB_NAME}
+      LOG_LEVEL: ${LOG_LEVEL}
+    networks:
+      - app_net
+    depends_on: 
+      - database
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == backend 
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:$${PORT:-3000}/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  frontend:
+    image: sebriede66/mein-notizblock-frontend:latest 
+    ports:
+      - "80:80" 
+    networks:
+      - app_net
+    depends_on: 
+      - backend
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.role == frontend 
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+  
+
+volumes:
+  postgres_data_swarm: 
+
+networks:
+  app_net: 
+    driver: overlay
