@@ -14,13 +14,47 @@ Ein Worker Node ist eine Maschine (physisch oder virtuell) im Kubernetes Cluster
 
 Wenn ich einen kubectl-Befehl absetze, spricht kubectl direkt mit dem Kubernetes API-Server. Der Api Server ist die zentrale Schnittstelle und das Frontend der Controle Plane. Alle Interaktionen mit dem Cluster, sei es von mir über kubectl oder von anderen Komponenten des Clusters, laufen über diesen API Server.
 
-# Wie hast du praktisch überprüft, dass kubectl erfolgreich eine Verbindung zu deinem lokalen Cluster herstellen konnte? Welche Befehle hast du dafür genutzt, und was hast du als erfolgreiche Ausgabe erwartet?
 
-Ich habe die erfolgreiche Verbindung von kubectl zu meinem lokalen Cluster mit mehreren Befehlen überprüft:
-kubectl config current-context: Ich erwartete hier die Ausgabe docker-desktop, was bestätigte, dass kubectl auf mein von Docker Desktop verwaltetes Cluster konfiguriert ist.
-kubectl get nodes: Hier erwartete ich eine Liste der Nodes meines Clusters. Für Docker Desktop war das ein Node namens docker-desktop mit dem Status Ready. Dies zeigte, dass kubectl Informationen über die Cluster-Infrastruktur abrufen kann.
-kubectl cluster-info: Dieser Befehl sollte mir die Adresse des Kubernetes API Servers (Control Plane) und anderer Cluster-Dienste anzeigen. Eine erfolgreiche Ausgabe bestätigte, dass die grundlegende Kommunikation mit dem Cluster-Management funktionierte.
-Die Tatsache, dass diese Befehle ohne Verbindungsfehler sinnvolle Informationen über das Cluster zurücklieferten, war der praktische Beweis für die erfolgreiche Verbindung.
+```markdown
+## 5. Wie hast du praktisch überprüft, dass `kubectl` erfolgreich eine Verbindung zu deinem lokalen Cluster herstellen konnte? Welche Befehle hast du dafür genutzt, und was hast du als erfolgreiche Ausgabe erwartet?
+
+Ich habe die erfolgreiche Verbindung von `kubectl` zu meinem lokalen Kubernetes Cluster, das ich mit Docker Desktop aufgesetzt habe, durch die Ausführung mehrerer spezifischer Befehle verifiziert. Jeder dieser Befehle lieferte bei Erfolg eine charakteristische Ausgabe:
+
+1.  **Überprüfung des aktuellen Kontexts:**
+    Mit dem Befehl:
+    ```bash
+    kubectl config current-context
+    ```
+    *   **Erwartete Ausgabe:** `docker-desktop`
+    *   **Bedeutung:** Diese Ausgabe bestätigte, dass `kubectl` korrekt konfiguriert war und den richtigen Kontext verwendete, nämlich den meines von Docker Desktop verwalteten Kubernetes Clusters.
+
+2.  **Abrufen der Cluster-Nodes:**
+    Mit dem Befehl:
+    ```bash
+    kubectl get nodes
+    ```
+    *   **Erwartete Ausgabe (beispielhaft):**
+        ```
+        NAME             STATUS   ROLES           AGE   VERSION
+        docker-desktop   Ready    control-plane   ...   ... 
+        ```
+    *   **Bedeutung:** Die erfolgreiche Auflistung des `docker-desktop` Nodes mit dem `STATUS Ready` zeigte, dass `kubectl` in der Lage war, grundlegende Informationen über die Infrastruktur des Clusters abzurufen und dass mindestens ein Node betriebsbereit war.
+
+3.  **Anzeigen von Cluster-Informationen:**
+    Mit dem Befehl:
+    ```bash
+    kubectl cluster-info
+    ```
+    *   **Erwartete Ausgabe (beispielhaft):**
+        ```
+        Kubernetes control plane is running at https://localhost:XXXXX
+        CoreDNS is running at https://localhost:XXXXX/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+        ...
+        ```
+    *   **Bedeutung:** Dieser Befehl lieferte die Endpunkt-Adressen der Kubernetes Control Plane (des API Servers) und anderer wichtiger Cluster-Dienste wie CoreDNS. Eine erfolgreiche Ausgabe ohne Verbindungsfehler bestätigte, dass die Kernkomponenten des Clusters liefen und über die API ansprechbar waren.
+
+Die Tatsache, dass alle diese `kubectl`-Befehle ohne Fehlermeldungen wie "Connection refused" ausgeführt werden konnten und stattdessen die erwarteten, sinnvollen Informationen über das Cluster zurücklieferten, diente als praktischer Beweis für die erfolgreich hergestellte Verbindung zwischen `kubectl` und meinem lokalen Kubernetes Cluster.
+```
 
 # Basierend auf dem Theorieteil: Erkläre kurz die Kernidee der deklarativen Philosophie von Kubernetes.
 
