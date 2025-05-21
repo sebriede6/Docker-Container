@@ -296,4 +296,11 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 *   **Sicherheit:** Es werden parametrisierte Abfragen im Backend verwendet, um SQL Injection zu verhindern. Es erfolgt eine grundlegende Validierung von Eingabedaten.
 *   **Module:** Das Backend verwendet ES-Module (`import`/`export`). Das Frontend ist komponentenbasiert aufgebaut.
 *   **.gitignore / .dockerignore:** Diese Dateien sind konfiguriert, um unnötige Dateien und sensible Informationen (wie `.env` für die lokale Entwicklung) von der Versionskontrolle bzw. dem Docker-Build-Kontext auszuschließen.
+
+## Kubernetes Einführung: Lokales Cluster
+
+Im Rahmen der Einführung in Kubernetes wurde ein lokales Kubernetes-Cluster mittels Docker Desktop aufgesetzt und die grundlegende Kommunikation mit `kubectl` verifiziert.
+
+Die Reflexionsfragen und der Nachweis (Screenshot) für diese Aufgabe befinden sich in der Datei:
+[kubernetes/k8s-intro-reflection.md](kubernetes/k8s-intro-reflection.md)
 ```
