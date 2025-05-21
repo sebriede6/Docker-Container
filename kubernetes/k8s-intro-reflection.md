@@ -33,7 +33,7 @@ Ich habe die erfolgreiche Verbindung von `kubectl` zu meinem lokalen Kubernetes 
     ```bash
     kubectl get nodes
     ```
-    *   **Erwartete Ausgabe (beispielhaft):**
+    *   **Erwartete Ausgabe:**
         ```
         NAME             STATUS   ROLES           AGE   VERSION
         docker-desktop   Ready    control-plane   ...   ... 
@@ -45,7 +45,7 @@ Ich habe die erfolgreiche Verbindung von `kubectl` zu meinem lokalen Kubernetes 
     ```bash
     kubectl cluster-info
     ```
-    *   **Erwartete Ausgabe (beispielhaft):**
+    *   **Erwartete Ausgabe:**
         ```
         Kubernetes control plane is running at https://localhost:XXXXX
         CoreDNS is running at https://localhost:XXXXX/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
