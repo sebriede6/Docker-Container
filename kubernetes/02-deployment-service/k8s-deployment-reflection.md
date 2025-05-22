@@ -52,7 +52,7 @@ Zusammengefasst ist `spec.template` das "Was" (die Pod-Definition), während die
 
 #### 6. Was passiert mit den Pods, wenn du das Deployment löschst – und warum ist das Verhalten logisch?
 
-Wenn ich ein Kubernetes `Deployment` lösche (z.B. mit `kubectl delete deployment nginx-app-deployment`), werden auch alle Pods, die von diesem Deployment erstellt und verwaltet wurden, automatisch beendet und gelöscht.
+Wenn ich ein Kubernetes `Deployment` lösche (mit `kubectl delete deployment nginx-app-deployment`), werden auch alle Pods, die von diesem Deployment erstellt und verwaltet wurden, automatisch beendet und gelöscht.
 
 Dieses Verhalten ist logisch, da das `Deployment` den *gewünschten Zustand* meiner Anwendung im Cluster repräsentiert – es sagt Kubernetes: "Sorge dafür, dass X Instanzen meiner Anwendung basierend auf dieser Pod-Vorlage laufen." Die Pods sind die konkreten Instanziierungen dieses gewünschten Zustands.
 
