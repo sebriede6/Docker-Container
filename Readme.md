@@ -233,7 +233,7 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 *   **Module:** ES-Module im Backend, komponentenbasiertes Frontend.
 *   **.gitignore / .dockerignore:** Konfiguriert, um unnötige Dateien und sensible Informationen auszuschließen.
 
-*  Desweiteren habe ich diese Anwendung in einem Cluster auf Azure deployed
+*  Desweiteren habe ich diese Anwendung in einem Cluster auf Azure deployed. Erreichbar unter dieser IP: http://131.189.216.129/
 ```
 
 
