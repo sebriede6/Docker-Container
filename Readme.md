@@ -221,14 +221,6 @@ Entferne den `notizblock.local`-Eintrag.
 
 ---
 
-## Kubernetes: Deployment, Service, Ingress & Rolling Updates (Beispielanwendungen)
-
-Frühere Aufgaben demonstrierten grundlegende Kubernetes-Konzepte. Die jeweiligen Reflexionsdateien und Konfigurationen befinden sich in den Unterordnern von `kubernetes/`:
-
-*   **Einführung & Lokales Cluster:** [kubernetes/01-intro/k8s-intro-reflection.md](kubernetes/01-intro/k8s-intro-reflection.md)
-*   **Deployment & Service (Nginx Beispiel):** [kubernetes/02-deployment-service/k8s-deployment-reflection.md](kubernetes/02-deployment-service/k8s-deployment-reflection.md)
-*   **Ingress (Nginx & HTTPBin Beispiel):** [kubernetes/03-ingress/k8s-ingress-reflection.md](kubernetes/03-ingress/k8s-ingress-reflection.md)
-
 ---
 
 ## SQL Recap & Datenmodell
