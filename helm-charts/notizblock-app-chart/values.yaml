@@ -1,0 +1,81 @@
+replicaCount: 1 
+
+fullnameOverride: "" 
+nameOverride: ""     
+
+
+frontend:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: sebriede66/mein-notizblock-frontend 
+    pullPolicy: Always
+    tag: "latest" 
+  service:
+    type: ClusterIP
+    port: 80
+  
+
+
+backend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: sebriede66/mein-notizblock-backend 
+    pullPolicy: IfNotPresent
+    tag: "latest" 
+  service:
+    type: ClusterIP
+    port: 3000 
+ 
+  env:
+    PORT: "3000" 
+    LOG_LEVEL: "info"
+   
+    DB_HOST_OVERRIDE: "" 
+    DB_PORT: "5432"
+    
+  
+  
+  probes:
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      failureThreshold: 3
+    readiness:
+      path: /health
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      failureThreshold: 3
+
+
+database:
+  enabled: true 
+ 
+  auth:
+    username: "notiz_user"
+    password: "sag ich nicht" 
+    database: "notizblock_db"
+    
+  primary: 
+    persistence:
+      enabled: true
+      size: 2Gi 
+
+ingress:
+  enabled: true
+  className: "nginx" 
+  host: "notizblock.local" 
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+   
+  paths:
+    frontend:
+      path: /
+      pathType: Prefix
+    backendApi:
+      path: /api(/|$)(.*)
+      pathType: ImplementationSpecific
+      rewriteTarget: /$2
+

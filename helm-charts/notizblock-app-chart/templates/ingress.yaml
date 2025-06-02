@@ -1,0 +1,31 @@
+# helm-charts/notizblock-app-chart/templates/ingress.yaml
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "notizblock-app-chart.fullname" . }}
+  labels:
+    {{- include "notizblock-app-chart.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.paths.frontend.path | default "/" }}
+            pathType: {{ .Values.ingress.paths.frontend.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "notizblock-app-chart.fullname" . }}-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+          - path: {{ .Values.ingress.paths.backendApi.path | default "/api(/|$)(.*)" }}
+            pathType: {{ .Values.ingress.paths.backendApi.pathType | default "ImplementationSpecific" }}
+            backend:
+              service:
+                name: {{ include "notizblock-app-chart.fullname" . }}-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+{{- end }}

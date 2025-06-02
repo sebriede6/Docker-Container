@@ -1,15 +1,16 @@
-```markdown
-# React Docker Notizblock App (Full-Stack: Lokal, Swarm & Kubernetes)
 
-Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die Anwendung wurde für verschiedene Deployment-Szenarien konfiguriert: lokale Entwicklung mit Docker Compose, verteiltes Deployment auf Docker Swarm und die Demonstration grundlegender Kubernetes-Konzepte mit einer Beispielanwendung.
+```markdown
+# React Docker Notizblock App (Full-Stack: Lokal, Swarm, Kubernetes & Helm)
+
+Dies ist eine Full-Stack Notizblock-Anwendung, die mit React (Frontend) und Node.js/Express (Backend) erstellt wurde. Die Anwendung wurde für verschiedene Deployment-Szenarien konfiguriert: lokale Entwicklung mit Docker Compose, verteiltes Deployment auf Docker Swarm und Paketierung als **Helm Chart** für die Bereitstellung auf Kubernetes.
 
 Die Kernanwendung (Notizblock) beinhaltet:
 *   Ein Frontend, das mit Vite gebaut und von Nginx als Webserver und Reverse Proxy ausgeliefert wird.
 *   Ein Backend, das eine REST-API für Notizen bereitstellt und Daten persistent in einer **PostgreSQL-Datenbank** speichert.
-*   Eine PostgreSQL-Datenbank als dedizierter Service.
+*   Eine PostgreSQL-Datenbank als dedizierter Service, integriert als Subchart in der Helm-Konfiguration.
 *   Integrierte, aussagekräftige Healthchecks für Datenbank und Backend zur Sicherstellung der Diensteverfügbarkeit.
 
-Zusätzlich wurden Kubernetes-Konzepte wie Deployments, Services, Rolling Updates und Rollbacks anhand einer Nginx-Beispielanwendung auf einem lokalen Kubernetes-Cluster (Docker Desktop) demonstriert.
+Zusätzlich wurden grundlegende Kubernetes-Konzepte (Deployment, Service, Ingress, Rolling Update, Rollback) anhand von Beispielanwendungen demonstriert.
 
 ## Projektstruktur
 
@@ -19,9 +20,13 @@ Zusätzlich wurden Kubernetes-Konzepte wie Deployments, Services, Rolling Update
 ├── .env                  # Lokale Umgebungsvariablen (nicht versioniert)
 ├── .gitignore
 ├── README.md             # Diese Datei
-├── docker-stack.yml      # Für AKS
+├── docker-stack.yml      # Für Docker Swarm Deployment der Notizblock-App
 ├── docker-compose.yml    # Für lokale Entwicklung der Notizblock-App
 ├── sql_schema_and_queries.md # Theoretische SQL Ausarbeitung
+├── Reflexionsfragen.md   # Allgemeine Reflexionsfragen (z.B. zu Swarm)
+│
+├── assets/               # Screenshots und andere Medien
+│   └── ...
 │
 ├── backend/              # Backend der Notizblock-App
 │   ├── Dockerfile
@@ -41,26 +46,44 @@ Zusätzlich wurden Kubernetes-Konzepte wie Deployments, Services, Rolling Update
 │   └── src/
 │       # ... (Frontend Quellcode und Komponenten)
 │
+├── helm-charts/
+│   └── notizblock-app-chart/ # Helm Chart für die Notizblock-Anwendung
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       ├── charts/             # Für Subcharts (z.B. PostgreSQL)
+│       └── templates/          # Kubernetes Manifest-Templates
+│           ├── backend-deployment.yaml
+│           ├── backend-secret.yaml
+│           ├── frontend-deployment.yaml
+│           ├── ingress.yaml
+│           └── _helpers.tpl
+│
 └── kubernetes/
     ├── 01-intro/
-    │   ├── k8s-intro-reflection.md   # Reflexion zur Kubernetes Einführung
-    │   └── [Screenshot_kubectl_get_nodes.png] # Beispiel-Screenshot K8s Nachweis
-    └── 02-deployment-service/
-        ├── nginx-app-v1/         # Nginx Beispielanwendung Version 1
-        │   ├── Dockerfile
-        │   └── index.html
-        ├── nginx-app-v2/         # Nginx Beispielanwendung Version 2
-        │   ├── Dockerfile
-        │   └── index.html
-        ├── nginx-deployment.yaml # K8s Deployment für Nginx-Beispiel
-        ├── nginx-service.yaml    # K8s Service für Nginx-Beispiel
-        └── k8s-deployment-reflection.md # Reflexion K8s Deployment Aufgabe
+    │   ├── k8s-intro-reflection.md       # Reflexion zur Kubernetes Einführung
+    │   └── Screenshot_kubectl_get_nodes.png # Beispiel-Screenshot K8s Nachweis
+    ├── 02-deployment-service/          # Nginx Beispiel für K8s Deployment/Service
+    │   ├── nginx-app-v1/
+    │   │   ├── Dockerfile
+    │   │   └── index.html
+    │   ├── nginx-app-v2/
+    │   │   ├── Dockerfile
+    │   │   └── index.html
+    │   ├── nginx-deployment.yaml
+    │   ├── nginx-service.yaml
+    │   └── k8s-deployment-reflection.md # Reflexion K8s Deployment Aufgabe
+    └── 03-ingress/                     # Beispiel für K8s Ingress
+        ├── httpbin-app.yaml
+        ├── my-ingress.yaml
+        ├── nginx-app.yaml              # Kann identisch mit der aus 02 sein oder angepasst
+        └── k8s-ingress-reflection.md   # Reflexion K8s Ingress Aufgabe
 ```
 
 ## Screenshots
 
-*   Funktionierende Anwendung im Browser (CRUD):
+*  Funktionierende Anwendung im Browser (CRUD):
     [![Anwendung läuft](assets)](assets)
+
 
 ## Features der Notizblock-Anwendung
 
@@ -69,17 +92,21 @@ Zusätzlich wurden Kubernetes-Konzepte wie Deployments, Services, Rolling Update
 *   Persistente Datenspeicherung in PostgreSQL.
 *   Sichere API durch parametrisierte Abfragen und Eingabevalidierung.
 *   Containerisierung mit Docker.
-*   Orchestrierung mit Docker Compose (lokal) und Docker Swarm (verteilt) inklusive Node Affinity.
+*   Orchestrierung mit Docker Compose (lokal), Docker Swarm (verteilt) und **Paketierung als Helm Chart für Kubernetes**.
+*   Node Affinity im Swarm.
+*   Frontend mit Nginx Reverse Proxy.
 *   Robuste Fehlerbehandlung und aussagekräftige Healthchecks.
-*   Frontend mit Nginx Reverse Proxy, Light/Dark-Mode, Suche, Filter, Sortierung und visuellen Effekten.
+*   Frontend-Features: Light/Dark-Mode, Suche, Filter, Sortierung und "Fliegender Notizzettel".
 
 ## Voraussetzungen
 
 *   Docker & Docker Compose
 *   `kubectl` Kommandozeilen-Tool
-*   Multipass (für Swarm-Setup) oder ein lokales Kubernetes-Cluster-Tool (z.B. Kubernetes in Docker Desktop, Minikube, Kind)
+*   **Helm CLI** (`helm version`)
+*   Ein lokales Kubernetes-Cluster (z.B. Kubernetes in Docker Desktop, Minikube, Kind)
+*   Multipass (optional, für Swarm-Setup)
 *   Git
-*   Ein Docker Hub Account (oder eine andere Container Registry)
+*   Ein Docker Hub Account 
 
 ## Lokales Setup der Notizblock-Anwendung (Docker Compose)
 
@@ -87,14 +114,14 @@ Für die lokale Entwicklung kann der Notizblock-Stack mit der `docker-compose.ym
 
 1.  **Repository klonen und navigieren:**
     ```bash
-    git clone https://github.com/sebriede6/Docker-Container.git 
-    cd Docker-Container 
+    git clone https://github.com/sebriede6/Docker-Container
+    cd Docker-Container
     ```
 2.  **`.env`-Datei erstellen:**
-    Erstelle eine `.env`-Datei im Projektwurzelverzeichnis (siehe `env.example` falls vorhanden) mit Inhalt wie:
+    Erstelle eine `.env`-Datei im Projektwurzelverzeichnis mit Inhalt wie:
     ```env
     DB_USER=myuser
-    DB_PASSWORD=secret 
+    DB_PASSWORD= 
     DB_NAME=notizblockdb
     BACKEND_PORT=3000
     LOG_LEVEL=debug
@@ -114,86 +141,107 @@ Für die lokale Entwicklung kann der Notizblock-Stack mit der `docker-compose.ym
 
 ---
 
-## Deployment der Notizblock-Anwendung auf Docker Swarm Cluster
-
-Dieser Abschnitt beschreibt, wie die Notizblock-Anwendung auf einem vorbereiteten Docker Swarm Cluster deployed wird, wobei die Dienste auf spezifisch gelabelten Worker-Nodes platziert werden. Die detaillierte Anleitung inklusive Setup des Swarms, Image-Build/Push, Konfiguration der `docker-stack.yml` und Verifizierungsschritten befindet sich in der [Reflexionsfragen.md](Reflexionsfragen.md) (oder einer separaten Datei, die du für die Swarm-Reflexionen verwendest).
-
-**Kurzübersicht der Schritte:**
-1.  Docker Swarm Cluster mit Multipass VMs einrichten (1 Manager, 3 Worker).
-2.  Worker Nodes labeln (`role=frontend`, `role=backend`, `role=database`).
-3.  Notizblock Frontend- und Backend-Images bauen und zu Docker Hub pushen.
-4.  `docker-stack.yml` vorbereiten/kopieren und Umgebungsvariablen auf dem Manager setzen.
-5.  Datenbankschema im Swarm-DB-Container erstellen.
-6.  Stack mit `docker stack deploy -c docker-stack.yml notizapp` deployen.
-7.  Verifizierung mittels `docker stack services`, `docker service ps`, Logs und Testen der Anwendung über eine Node-IP.
-
 ---
 
-## Kubernetes: Deployment, Service, Rolling Update & Rollback (Nginx Beispielanwendung)
+## Deployment der Notizblock-Anwendung mit Helm auf Kubernetes
 
-Diese Aufgabe demonstriert grundlegende Kubernetes-Konzepte (Deployment, Service, Rolling Update, Rollback) anhand einer einfachen Nginx-Anwendung auf einem lokalen Kubernetes-Cluster (z.B. aktiviert in Docker Desktop).
+Dieser Abschnitt beschreibt, wie die gesamte Full-Stack Notizblock-Anwendung als Helm Chart paketiert und auf einem lokalen Kubernetes-Cluster (z.B. Docker Desktop Kubernetes) installiert, aktualisiert und deinstalliert wird. Das PostgreSQL Subchart von Bitnami wird als Abhängigkeit für die Datenbank genutzt.
 
-**Ziel:** Eine Nginx-Anwendung deployen, über einen NodePort-Service zugänglich machen, ein Update auf eine neue Version durchführen und anschließend einen Rollback zur vorherigen Version demonstrieren.
+### 1. Vorbereitung
 
-### Vorbereitung der Nginx-Images
+*   **Lokales Kubernetes-Cluster:** Stelle sicher, dass dein lokales K8s-Cluster läuft und `kubectl` darauf zugreift (`kubectl config use-context docker-desktop`).
+*   **Helm CLI:** Muss installiert sein (`helm version`).
+*   **Notizblock-App Images:** Die Docker Images für dein Frontend (`DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-frontend:latest`) und Backend (`DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-backend:latest`) müssen in einer erreichbaren Registry (z.B. Docker Hub) verfügbar sein. Ersetze `DEIN_DOCKERHUB_BENUTZERNAME` entsprechend.
 
-Zwei Versionen einer einfachen Nginx-Seite (`nginx-app-v1` und `nginx-app-v2` mit unterschiedlichen `index.html` Dateien) wurden erstellt. Die Dockerfiles befinden sich in:
-*   `kubernetes/02-deployment-service/nginx-app-v1/Dockerfile`
-*   `kubernetes/02-deployment-service/nginx-app-v2/Dockerfile`
+### 2. Helm Chart Struktur und Konfiguration
 
-Diese Images müssen gebaut und zu einer Registry gepusht werden (ersetze `DEIN_DOCKERHUB_BENUTZERNAME`):
+Das Helm Chart für diese Anwendung befindet sich im Verzeichnis `helm-charts/notizblock-app-chart/` und enthält:
+*   **`Chart.yaml`**: Definiert das Chart und seine Abhängigkeit zum Bitnami PostgreSQL Chart (Alias `database`).
+*   **`values.yaml`**: Zentrale Konfigurationsdatei. **Wichtig:** Das `database.auth.password` sollte für die Abgabe nicht im Klartext in der versionierten `values.yaml` stehen, sondern beim `helm install/upgrade` über `--set database.auth.password=DEIN_PASSWORT` übergeben werden.
+*   **`templates/`**: Kubernetes Manifest-Templates für Backend, Frontend, Ingress und Secrets.
+*   **`charts/`**: Enthält das heruntergeladene PostgreSQL Subchart nach `helm dependency update`.
+
+### 3. Chart als Release installieren
+
+1.  **Navigiere in das Wurzelverzeichnis des Charts:** `cd helm-charts/notizblock-app-chart`
+2.  **Abhängigkeiten aktualisieren:** `helm dependency update`
+3.  **Chart installieren (ersetze Platzhalter):**
+    ```bash
+    helm install notizblock-release ./ \
+        --namespace default \
+        --set frontend.image.repository=DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-frontend \
+        --set backend.image.repository=DEIN_DOCKERHUB_BENUTZERNAME/mein-notizblock-backend \
+        --set database.auth.password='DEIN_SICHERES_DB_PASSWORT' \
+        --set ingress.host='notizblock.local' \
+        --set ingress.className='nginx' 
+    ```
+
+### 4. Initialen Release überprüfen
+
+1.  **Status und Ressourcen:**
+    ```bash
+    helm list -n default
+    kubectl get all,pvc,secret -n default -l app.kubernetes.io/instance=notizblock-release
+    ```
+    Warte, bis Pods `Running`/`Ready` und PVC `Bound` sind.
+2.  **Datenbankschema erstellen (nach Erstinstallation):**
+    *   Finde den PostgreSQL-Pod-Namen (z.B. `notizblock-release-database-postgresql-0`) mit:
+        `kubectl get pods -n default -l app.kubernetes.io/instance=notizblock-release,app.kubernetes.io/name=postgresql`
+    *   Kopiere SQL-Skripte in den Pod (Pfad relativ zum Chart-Verzeichnis):
+        ```bash
+        kubectl cp ../../backend/sql/initial_schema.sql <POSTGRES_POD_NAME>:/tmp/initial_schema.sql -n default
+        kubectl cp ../../backend/sql/update_schema_add_completed.sql <POSTGRES_POD_NAME>:/tmp/update_schema_add_completed.sql -n default
+        ```
+    *   Führe Skripte aus (ersetze User/DB-Name mit Werten aus `values.yaml` unter `database.auth`, z.B. `notiz_user`, `notizblock_db`):
+        ```bash
+        kubectl exec -it <POSTGRES_POD_NAME> -n default -- psql -U notiz_user -d notizblock_db -f /tmp/initial_schema.sql
+        kubectl exec -it <POSTGRES_POD_NAME> -n default -- psql -U notiz_user -d notizblock_db -f /tmp/update_schema_add_completed.sql
+        ```
+3.  **Lokale Hosts-Datei anpassen:** Füge `127.0.0.1 notizblock.local` hinzu und leere den DNS-Cache.
+4.  **Browser-Test:** Öffne `http://notizblock.local/`.
+
+### 5. Release aktualisieren (Beispiel)
 ```bash
-
-docker build -t DEIN_DOCKERHUB_BENUTZERNAME/nginx-example:v1 ./kubernetes/02-deployment-service/nginx-app-v1
-docker build -t DEIN_DOCKERHUB_BENUTZERNAME/nginx-example:v2 ./kubernetes/02-deployment-service/nginx-app-v2
-docker login 
-docker push DEIN_DOCKERHUB_BENUTZERNAME/nginx-example:v1
-docker push DEIN_DOCKERHUB_BENUTZERNAME/nginx-example:v2
+helm upgrade notizblock-release ./ \
+    --namespace default \
+    --reuse-values \
+    --set frontend.replicaCount=2 \ # Beispielhafte Änderung
+    --set database.auth.password='DEIN_SICHERES_DB_PASSWORT' 
 ```
 
-### Kubernetes Manifeste und Deployment
+### 6. Release deinstallieren
+```bash
+helm uninstall notizblock-release --namespace default
 
-Die Kubernetes Manifest-Dateien für das Deployment und den Service der Nginx-Anwendung befinden sich in `kubernetes/02-deployment-service/`:
-*   `nginx-deployment.yaml`
-*   `nginx-service.yaml`
+```
 
-**Anleitung zum Deployen und Testen (Kurzform):**
+### 7. Aufräumen (Hosts-Datei)
+Entferne den `notizblock.local`-Eintrag.
 
-1.  **Kontext sicherstellen:** `kubectl config use-context docker-desktop` (oder dein lokaler Cluster-Kontext).
-2.  **Deployment anwenden:**
-    Passe in `nginx-deployment.yaml` den Image-Pfad (`image: DEIN_DOCKERHUB_BENUTZERNAME/nginx-example:v1`) an.
-    ```bash
-    kubectl apply -f kubernetes/02-deployment-service/nginx-deployment.yaml
-    kubectl apply -f kubernetes/02-deployment-service/nginx-service.yaml
-    ```
-3.  **Überprüfen und Zugriff:**
-    ```bash
-    kubectl get deployment nginx-app-deployment
-    kubectl get pods -l app=nginx-example
-    kubectl get service nginx-app-service 
-    ```
-    Öffne im Browser `http://localhost:<NodePort>`. Version 1 der Nginx-Seite sollte sichtbar sein.
-4.  **Rolling Update auf Version 2:**
-    *   Ändere in `nginx-deployment.yaml` das Image auf `:v2`.
-    *   `kubectl apply -f kubernetes/02-deployment-service/nginx-deployment.yaml`
-    *   Beobachte mit `kubectl rollout status deployment/nginx-app-deployment`.
-    *   Nach Erfolg: Browser neu laden. Version 2 sollte sichtbar sein.
-5.  **Rollback auf Version 1:**
-    *   `kubectl rollout undo deployment/nginx-app-deployment`
-    *   Nach Erfolg: Browser neu laden. Version 1 sollte wieder sichtbar sein.
-6.  **Aufräumen:**
-    ```bash
-    kubectl delete -f kubernetes/02-deployment-service/nginx-deployment.yaml -f kubernetes/02-deployment-service/nginx-service.yaml
-    ```
-
-**Die detaillierten Reflexionsantworten zu dieser Kubernetes-Deployment-Aufgabe befinden sich in:**
-[kubernetes/02-deployment-service/k8s-deployment-reflection.md](kubernetes/02-deployment-service/k8s-deployment-reflection.md)
 
 ---
 
+## Kubernetes: Deployment, Service, Ingress & Rolling Updates (Beispielanwendungen)
 
-# Deployen in einem AKS
+Frühere Aufgaben demonstrierten grundlegende Kubernetes-Konzepte. Die jeweiligen Reflexionsdateien und Konfigurationen befinden sich in den Unterordnern von `kubernetes/`:
 
-Desweiteren habe ich diese Anwendung bereits in einem Kubernetes Cluster auf Azure deployed.
+*   **Einführung & Lokales Cluster:** [kubernetes/01-intro/k8s-intro-reflection.md](kubernetes/01-intro/k8s-intro-reflection.md)
+*   **Deployment & Service (Nginx Beispiel):** [kubernetes/02-deployment-service/k8s-deployment-reflection.md](kubernetes/02-deployment-service/k8s-deployment-reflection.md)
+*   **Ingress (Nginx & HTTPBin Beispiel):** [kubernetes/03-ingress/k8s-ingress-reflection.md](kubernetes/03-ingress/k8s-ingress-reflection.md)
 
 ---
+
+## SQL Recap & Datenmodell
+
+Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich in der Datei `sql_schema_and_queries.md`. Die für die Notizblock-Anwendung verwendeten Schemata sind `backend/sql/initial_schema.sql` und `backend/sql/update_schema_add_completed.sql`.
+
+## Code-Qualität und Konventionen
+
+*   **Sicherheit:** Parametrisierte Abfragen im Backend, grundlegende Eingabevalidierung. Sensible Daten werden über Umgebungsvariablen oder Helm-Mechanismen verwaltet.
+*   **Module:** ES-Module im Backend, komponentenbasiertes Frontend.
+*   **.gitignore / .dockerignore:** Konfiguriert, um unnötige Dateien und sensible Informationen auszuschließen.
+
+*  Desweiteren habe ich diese Anwendung in einem Cluster auf Azure deployed
+```
+
+
