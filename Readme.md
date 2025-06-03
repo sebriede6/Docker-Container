@@ -198,6 +198,16 @@ helm uninstall notizblock-release --namespace default
 ### 7. Aufräumen (Hosts-Datei)
 Entferne den `notizblock.local`-Eintrag.
 
+## Terraform: Erste Schritte mit Providern und Ressourcen
+
+Diese Aufgabe diente der Einführung in Infrastructure as Code mit Terraform. Es wurde eine einfache Terraform-Konfiguration erstellt, um den Docker-Provider zu nutzen und ein Nginx-Image sowie einen Container zu definieren. Die grundlegenden Terraform-Workflow-Befehle `terraform init` und `terraform plan` wurden ausgeführt und verstanden.
+
+Die Terraform-Konfigurationsdateien (`provider.tf`, `main.tf`) befinden sich im Verzeichnis:
+[terraform/01-first-steps/](./terraform/01-first-steps/)
+
+Die Reflexionsantworten zu dieser Aufgabe sind in der Datei:
+`[terraform/01-first-steps/terraform-reflection.md]` 
+
 
 ---
 
@@ -216,13 +226,5 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 *  Desweiteren habe ich diese Anwendung in einem Cluster auf Azure deployed. Erreichbar unter dieser IP: http://131.189.216.129/
 ```
 
-## Terraform: Erste Schritte mit Providern und Ressourcen
 
-Diese Aufgabe diente der Einführung in Infrastructure as Code mit Terraform. Es wurde eine einfache Terraform-Konfiguration erstellt, um den Docker-Provider zu nutzen und ein Nginx-Image sowie einen Container zu definieren. Die grundlegenden Terraform-Workflow-Befehle `terraform init` und `terraform plan` wurden ausgeführt und verstanden.
-
-Die Terraform-Konfigurationsdateien (`provider.tf`, `main.tf`) befinden sich im Verzeichnis:
-[terraform/01-first-steps/](./terraform/01-first-steps/)
-
-Die Reflexionsantworten zu dieser Aufgabe sind in der Datei:
-`[terraform/01-first-steps/terraform-reflection.md]` 
 
