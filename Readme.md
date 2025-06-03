@@ -206,7 +206,7 @@ Die Terraform-Konfigurationsdateien (`provider.tf`, `main.tf`) befinden sich im 
 [terraform/01-first-steps/](./terraform/01-first-steps/)
 
 Die Reflexionsantworten zu dieser Aufgabe sind in der Datei:
-[terraform/01-first-steps/](./Reflexionsfragen.md/)
+[terraform/01-first-steps/](./terraform/01-first-steps/terraform-first-steps-reflection.md)
 
 
 ---
