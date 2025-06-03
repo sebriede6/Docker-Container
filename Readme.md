@@ -17,66 +17,46 @@ Zusätzlich wurden grundlegende Kubernetes-Konzepte (Deployment, Service, Ingres
 ```text
 .
 ├── .dockerignore
-├── .env                  # Lokale Umgebungsvariablen (nicht versioniert)
+├── .env                  
 ├── .gitignore
-├── README.md             # Diese Datei
-├── docker-stack.yml      # Für Docker Swarm Deployment der Notizblock-App
-├── docker-compose.yml    # Für lokale Entwicklung der Notizblock-App
-├── sql_schema_and_queries.md # Theoretische SQL Ausarbeitung
-├── Reflexionsfragen.md   # Allgemeine Reflexionsfragen (z.B. zu Swarm)
+├── README.md             
+├── docker-stack.yml      
+├── docker-compose.yml    
+├── sql_schema_and_queries.md 
+├── Reflexionsfragen.md   
 │
-├── assets/               # Screenshots und andere Medien
+├── assets/               
 │   └── ...
 │
-├── backend/              # Backend der Notizblock-App
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── server.js
-│   ├── sql/                  
-│   │   ├── initial_schema.sql 
-│   │   └── update_schema_add_completed.sql
-│   └── src/
-│       # ... (Backend Quellcode)
+├── backend/              
+│   # ... (Backend-Struktur wie zuvor)
 │
-├── frontend/             # Frontend der Notizblock-App
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-│       # ... (Frontend Quellcode und Komponenten)
+├── frontend/             
+│   
 │
 ├── helm-charts/
 │   └── notizblock-app-chart/ # Helm Chart für die Notizblock-Anwendung
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       ├── charts/             # Für Subcharts (z.B. PostgreSQL)
-│       └── templates/          # Kubernetes Manifest-Templates
-│           ├── backend-deployment.yaml
-│           ├── backend-secret.yaml
-│           ├── frontend-deployment.yaml
-│           ├── ingress.yaml
-│           └── _helpers.tpl
+│      
 │
-└── kubernetes/
-    ├── 01-intro/
-    │   ├── k8s-intro-reflection.md       # Reflexion zur Kubernetes Einführung
-    │   └── Screenshot_kubectl_get_nodes.png # Beispiel-Screenshot K8s Nachweis
-    ├── 02-deployment-service/          # Nginx Beispiel für K8s Deployment/Service
-    │   ├── nginx-app-v1/
-    │   │   ├── Dockerfile
-    │   │   └── index.html
-    │   ├── nginx-app-v2/
-    │   │   ├── Dockerfile
-    │   │   └── index.html
-    │   ├── nginx-deployment.yaml
-    │   ├── nginx-service.yaml
-    │   └── k8s-deployment-reflection.md # Reflexion K8s Deployment Aufgabe
-    └── 03-ingress/                     # Beispiel für K8s Ingress
-        ├── httpbin-app.yaml
-        ├── my-ingress.yaml
-        ├── nginx-app.yaml              # Kann identisch mit der aus 02 sein oder angepasst
-        └── k8s-ingress-reflection.md   # Reflexion K8s Ingress Aufgabe
+├── kubernetes/
+│   ├── 01-intro/
+│   │   ├── k8s-intro-reflection.md
+│   │   └── Screenshot_kubectl_get_nodes.png
+│   ├── 02-deployment-service/
+│   │   # ... (Dateien zur K8s Deployment/Service Aufgabe mit Nginx)
+│   │   └── k8s-deployment-reflection.md
+│   └── 03-ingress/
+│       # ... (Dateien zur K8s Ingress Aufgabe)
+│       └── k8s-ingress-reflection.md
+│
+└── terraform/
+    └── 01-first-steps/
+        ├── main.tf                             
+        ├── provider.tf                         
+        ├── terraform-first-steps-reflection.md 
+        └── assets/                             
+            ├── Screenshot_terraform_init.png
+            └── Screenshot_terraform_plan.png
 ```
 
 ## Screenshots
@@ -205,7 +185,7 @@ Das Helm Chart für diese Anwendung befindet sich im Verzeichnis `helm-charts/no
 helm upgrade notizblock-release ./ \
     --namespace default \
     --reuse-values \
-    --set frontend.replicaCount=2 \ # Beispielhafte Änderung
+    --set frontend.replicaCount=2 \ 
     --set database.auth.password='DEIN_SICHERES_DB_PASSWORT' 
 ```
 
@@ -236,4 +216,13 @@ Eine theoretische Ausarbeitung eines relationalen Datenbankmodells befindet sich
 *  Desweiteren habe ich diese Anwendung in einem Cluster auf Azure deployed. Erreichbar unter dieser IP: http://131.189.216.129/
 ```
 
+## Terraform: Erste Schritte mit Providern und Ressourcen
+
+Diese Aufgabe diente der Einführung in Infrastructure as Code mit Terraform. Es wurde eine einfache Terraform-Konfiguration erstellt, um den Docker-Provider zu nutzen und ein Nginx-Image sowie einen Container zu definieren. Die grundlegenden Terraform-Workflow-Befehle `terraform init` und `terraform plan` wurden ausgeführt und verstanden.
+
+Die Terraform-Konfigurationsdateien (`provider.tf`, `main.tf`) befinden sich im Verzeichnis:
+[terraform/01-first-steps/](./terraform/01-first-steps/)
+
+Die Reflexionsantworten zu dieser Aufgabe sind in der Datei:
+`[terraform/01-first-steps/terraform-reflection.md]` 
 
