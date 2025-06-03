@@ -157,7 +157,7 @@ Dieser Abschnitt beschreibt, wie die gesamte Full-Stack Notizblock-Anwendung als
 
 Das Helm Chart für diese Anwendung befindet sich im Verzeichnis `helm-charts/notizblock-app-chart/` und enthält:
 *   **`Chart.yaml`**: Definiert das Chart und seine Abhängigkeit zum Bitnami PostgreSQL Chart (Alias `database`).
-*   **`values.yaml`**: Zentrale Konfigurationsdatei. **Wichtig:** Das `database.auth.password` sollte für die Abgabe nicht im Klartext in der versionierten `values.yaml` stehen, sondern beim `helm install/upgrade` über `--set database.auth.password=DEIN_PASSWORT` übergeben werden.
+*   **`values.yaml`**
 *   **`templates/`**: Kubernetes Manifest-Templates für Backend, Frontend, Ingress und Secrets.
 *   **`charts/`**: Enthält das heruntergeladene PostgreSQL Subchart nach `helm dependency update`.
 
