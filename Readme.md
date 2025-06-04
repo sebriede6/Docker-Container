@@ -198,16 +198,90 @@ helm uninstall notizblock-release --namespace default
 ### 7. Aufräumen (Hosts-Datei)
 Entferne den `notizblock.local`-Eintrag.
 
-## Terraform: Erste Schritte mit Providern und Ressourcen
+---
 
-Diese Aufgabe diente der Einführung in Infrastructure as Code mit Terraform. Es wurde eine einfache Terraform-Konfiguration erstellt, um den Docker-Provider zu nutzen und ein Nginx-Image sowie einen Container zu definieren. Die grundlegenden Terraform-Workflow-Befehle `terraform init` und `terraform plan` wurden ausgeführt und verstanden.
+## Terraform: Infrastructure as Code - Erste Schritte & Flexibilisierung
 
-Die Terraform-Konfigurationsdateien (`provider.tf`, `main.tf`) befinden sich im Verzeichnis:
-[terraform/01-first-steps/](./terraform/01-first-steps/)
+Diese Aufgabe diente der Einführung in Infrastructure as Code (IaC) mit Terraform. Es wurde eine einfache Terraform-Konfiguration entwickelt, um den Docker-Provider zu nutzen, einen Nginx-Container zu erstellen und dessen Inhalt dynamisch über Variablen zu steuern. Der grundlegende Terraform-Workflow (`init`, `plan`, `apply`, `destroy`) sowie die Verwendung von Input-Variablen und Outputs wurden praktisch angewendet.
 
-Die Reflexionsantworten zu dieser Aufgabe sind in der Datei:
-[terraform/01-first-steps/](./terraform/01-first-steps/terraform-first-steps-reflection.md)
+### Terraform-Konfiguration und Dateien
 
+Die Terraform-Konfigurationsdateien für diese Aufgabe befinden sich im Verzeichnis `terraform/01-first-steps/` und umfassen:
+
+*   **`provider.tf`**: Definiert den `kreuzwerker/docker`-Provider und konfiguriert ihn für die Interaktion mit dem lokalen Docker-Daemon.
+*   **`main.tf`**: Enthält die Ressourcendefinition für einen `docker_container` (Nginx). Der Containername, der exponierte Host-Port und der Inhalt der `index.html` im Container werden über Variablen gesteuert. Ein `local-exec` Provisioner wird verwendet, um die `index.html` dynamisch im Container zu erstellen.
+*   **`variables.tf`**: Definiert die Input-Variablen:
+    *   `container_name`: Name des Docker-Containers (Typ: `string`, mit Default-Wert).
+    *   `external_port`: Externer Host-Port, der auf den internen Port 80 des Containers gemappt wird (Typ: `number`).
+    *   `nginx_html_content`: Der HTML-Inhalt für die `index.html`-Seite des Nginx-Containers (Typ: `string`, mit Default-Wert, der andere Variablen interpoliert).
+*   **`outputs.tf`**: Definiert Outputs, um Informationen über die erstellten Ressourcen nach einem `terraform apply` anzuzeigen, wie z.B. den Containernamen, die Container-ID und den verwendeten externen Port.
+*   **`test.tfvars`**: Eine Beispieldatei zur Demonstration der Variablenübergabe. **Hinweis:** In einem realen Projekt würden `.tfvars`-Dateien mit sensiblen Daten nicht in die Versionskontrolle eingecheckt, sondern über `.gitignore` ausgeschlossen. Für diese Übung enthält `test.tfvars` nur nicht-sensible Beispielwerte.
+
+### Terraform Workflow Ausführung
+
+Die folgenden Schritte beschreiben den vollständigen Workflow im Verzeichnis `terraform/01-first-steps/`:
+
+1.  **Initialisierung (`terraform init`):**
+    Dieser Befehl wird einmalig pro neuem Arbeitsverzeichnis oder nach Änderungen an den Provider-Anforderungen ausgeführt. Er lädt die notwendigen Provider-Plugins herunter (hier den Docker-Provider) und initialisiert das Backend (standardmäßig lokal).
+    ```bash
+    cd terraform/01-first-steps/
+    terraform init
+    ```
+    *Erfolgreicher Output sollte "Terraform has been successfully initialized!" anzeigen.*
+
+2.  **Planerstellung (`terraform plan`):**
+    Dieser Befehl erstellt einen Ausführungsplan. Er zeigt, welche Aktionen Terraform durchführen würde, um den in den `.tf`-Dateien definierten Zustand zu erreichen, ohne tatsächlich Änderungen vorzunehmen.
+    *   **Plan mit Default-Werten:**
+        ```bash
+        terraform plan
+        ```
+    *   **Plan mit Werten aus einer `.tfvars`-Datei:**
+        ```bash
+        terraform plan -var-file="test.tfvars"
+        ```
+    *Erwarteter Output zeigt, welche Ressourcen erstellt (`+`), geändert (`~`) oder zerstört (`-`) würden.*
+
+3.  **Anwendung der Änderungen (`terraform apply`):**
+    Dieser Befehl wendet die im Plan gezeigten Änderungen auf die Infrastruktur an.
+    *   **Apply mit Werten aus einer `.tfvars`-Datei:**
+        ```bash
+        terraform apply -var-file="test.tfvars"
+        ```
+        Terraform zeigt erneut den Plan und fragt interaktiv nach Bestätigung (`yes`). Nach erfolgreicher Ausführung werden die definierten Output-Werte angezeigt.
+    *   **Apply mit Überschreibung durch CLI-Variable:**
+        Variablen, die per `-var` auf der Kommandozeile übergeben werden, haben höhere Priorität als Werte aus `.tfvars`-Dateien oder Defaults.
+        ```bash
+        terraform apply -var-file="test.tfvars" -var="container_name=mein-cli-container"
+        ```
+    *   **Apply mit Default-Werten (wenn keine `.tfvars`-Datei oder CLI-Variablen für spezifische Werte angegeben werden):**
+        Wenn z.B. `container_name` aus `test.tfvars` entfernt wird, wird der Default-Wert aus `variables.tf` verwendet.
+        ```bash
+        terraform apply # (Wenn test.tfvars z.B. nur external_port definiert)
+        ```
+
+4.  **Überprüfung der erstellten Ressourcen:**
+    *   Mit Docker-Befehlen: `docker ps` (um den laufenden Container zu sehen).
+    *   Im Browser: `http://localhost:<external_port>` (z.B. `http://localhost:8888`, wenn `external_port` in `test.tfvars` auf `8888` gesetzt wurde). Die Seite sollte den Inhalt aus `var.nginx_html_content` anzeigen.
+
+5.  **Anzeigen der Outputs:**
+    Nach einem erfolgreichen `apply` oder jederzeit später:
+    ```bash
+    terraform output # Zeigt alle definierten Outputs
+    terraform output container_name_output # Zeigt einen spezifischen Output
+    ```
+
+6.  **Zerstören der Infrastruktur (`terraform destroy`):**
+    Dieser Befehl entfernt alle von Terraform in dieser Konfiguration erstellten Ressourcen.
+    ```bash
+    terraform destroy -var-file="test.tfvars" # Oder mit den passenden Variablen, die den aktuellen Zustand repräsentieren
+    ```
+    Bestätigung mit `yes` ist erforderlich.
+
+
+**Die detaillierten Reflexionsantworten zu dieser Terraform-Aufgabe befinden sich in:**
+`[Pfad/zu/deiner/Terraform_Reflexionsdatei.md]` *(z.B. `terraform/01-first-steps/terraform-first-steps-reflection.md`)*
+
+---
 
 ---
 
