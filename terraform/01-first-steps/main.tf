@@ -1,13 +1,17 @@
-resource "docker_image" "nginx_image" {
-  name         = "nginx:1.27-alpine" # Spezifischere Version als nur :latest
-  keep_locally = false # Optional: Entfernt das Image lokal, wenn die Ressource zerstört wird
-}
-
 resource "docker_container" "simple_nginx_container" {
-  name  = "my-first-tf-nginx-container"
-  image = docker_image.nginx_image.image_id # Referenziert das Image über seine ID
+  name  = var.container_name
+  image = "nginx:1.27-alpine"
   ports {
     internal = 80
-    # external = 8088 # Optional: Wenn du einen Port zum Host mappen willst
+    external = var.external_port
+  }
+  provisioner "local-exec" {
+    when    = create 
+    command = <<EOT
+      echo "Waiting for container ${self.name} (${self.id}) to be ready..."
+      sleep 5
+      docker exec ${self.id} sh -c 'echo "${var.nginx_html_content}" > /usr/share/nginx/html/index.html'
+      echo "index.html updated in container ${self.name}"
+    EOT
   }
 }
