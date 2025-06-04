@@ -279,7 +279,7 @@ Die folgenden Schritte beschreiben den vollständigen Workflow im Verzeichnis `t
 
 
 **Die detaillierten Reflexionsantworten zu dieser Terraform-Aufgabe befinden sich in:**
-`[Pfad/zu/deiner/Terraform_Reflexionsdatei.md]` *(z.B. `terraform/01-first-steps/terraform-first-steps-reflection.md`)*
+(`terraform/01-first-steps/terraform-first-steps-reflection.md`)*
 
 ---
 
